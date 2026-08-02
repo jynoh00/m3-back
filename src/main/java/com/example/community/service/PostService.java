@@ -2,6 +2,7 @@ package com.example.community.service;
 
 import com.example.community.dto.LikeResponseDTO;
 import com.example.community.dto.PostRequestDTO;
+import com.example.community.dto.PostSummaryDTO;
 import com.example.community.entity.history.post.PostHistory;
 import com.example.community.entity.main.post.Post;
 import com.example.community.entity.main.post.PostContent;
@@ -106,22 +107,8 @@ public class PostService {
 
         Page<Post> postPage = postRepository.findPageWithUser(pageable);
 
-        List<Map<String, Object>> posts = postPage.getContent().stream()
-                .map(post -> {
-                    Map<String, Object> postMap = new HashMap<>();
-                    postMap.put("post_id", post.getId());
-                    postMap.put("post_title", post.getTitle());
-                    postMap.put("post_image", post.getImage());
-                    postMap.put("created_at", post.getCreatedAt());
-                    postMap.put("like_count", post.getLikeCount());
-                    postMap.put("view_count", post.getViewCount());
-                    postMap.put("report_count", post.getReportCount());
-                    postMap.put("user_id", post.getUser().getId());
-                    postMap.put("user_nickname", post.getUser().getNickname());
-                    postMap.put("user_image", post.getUser().getImage());
-                    postMap.put("comment_count", post.getCommentCount());
-                    return postMap;
-                })
+        List<PostSummaryDTO> posts = postPage.getContent().stream()
+                .map(PostSummaryDTO::new)
                 .toList();
 
         Map<String, Object> response = new HashMap<>();
