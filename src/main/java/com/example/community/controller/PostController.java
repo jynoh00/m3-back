@@ -3,11 +3,9 @@ package com.example.community.controller;
 import com.example.community.common.ReportStatus;
 import com.example.community.common.ResponseFormat;
 import com.example.community.common.ResponseMessage;
-import com.example.community.dto.LikeResponseDTO;
-import com.example.community.dto.PostReportRequestDTO;
+import com.example.community.dto.*;
 import com.example.community.security.TokenProvider;
 import com.example.community.service.PostService;
-import com.example.community.dto.PostRequestDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +24,7 @@ public class PostController { // 게시글 관련 요청 처리
 
     @GetMapping
     public ResponseEntity<?> getPosts(@RequestParam(defaultValue = "1") int page) {
-        Map<String, Object> pageInfo = postService.postsPageLoadProcess(page);
+        PostPageResponseDTO pageInfo = postService.postsPageLoadProcess(page);
 
         return ResponseEntity.ok(ResponseFormat.of(ResponseMessage.POSTS_PAGE_LOAD.getMessage(), pageInfo));
     }
@@ -50,7 +48,7 @@ public class PostController { // 게시글 관련 요청 처리
     public ResponseEntity<?> getNewPostForm(HttpServletRequest request) {
         Long userId = tokenProvider.getUserId(request);
 
-        Map<String, Object> response = postService.getNewPostFormProcess(userId);
+        NewPostFormResponseDTO response = postService.getNewPostFormProcess(userId);
 
         return ResponseEntity.ok(ResponseFormat.of(
                 ResponseMessage.NEW_PAGE_LOAD.getMessage(),
@@ -62,7 +60,7 @@ public class PostController { // 게시글 관련 요청 처리
     public ResponseEntity<?> getPost(@PathVariable("post_id") Long postId,
                                      HttpServletRequest request) {
         Long userId = tokenProvider.getUserId(request);
-        Map<String, Object> post = postService.getPostProcess(postId, userId);
+        PostDetailResponseDTO post = postService.getPostProcess(postId, userId);
 
         return ResponseEntity.ok(ResponseFormat.of(ResponseMessage.POST_DETAILS_PAGE_LOAD.getMessage(), post));
     }
@@ -95,7 +93,7 @@ public class PostController { // 게시글 관련 요청 처리
     public ResponseEntity<?> getPostEditForm(@PathVariable("post_id") Long postId, HttpServletRequest request) {
 
         Long userId = tokenProvider.getUserId(request);
-        Map<String, Object> postInfo = postService.getPostInfo(postId, userId);
+        PostEditFormResponseDTO postInfo = postService.getPostInfo(postId, userId);
         return ResponseEntity.ok(ResponseFormat.of(ResponseMessage.POST_EDIT_PAGE_LOAD.getMessage(), postInfo));
     }
 
@@ -106,10 +104,7 @@ public class PostController { // 게시글 관련 요청 처리
         LikeResponseDTO likeResponseDTO = postService.toggleLikeProcess(postId, userId);
 
         return ResponseEntity.ok(ResponseFormat.of(ResponseMessage.LIKE_UPDATE_SUCCESS.getMessage(),
-                Map.of(
-                        "like_count", likeResponseDTO.getLikeCount(),
-                        "increase_like_count", likeResponseDTO.isLike()
-                )));
+                likeResponseDTO));
     }
 
     @PostMapping("/{post_id}/report")

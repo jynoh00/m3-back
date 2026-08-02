@@ -1,9 +1,7 @@
 package com.example.community.service;
 
 import com.example.community.common.ExceptionMessage;
-import com.example.community.dto.LikeResponseDTO;
-import com.example.community.dto.PostRequestDTO;
-import com.example.community.dto.PostSummaryDTO;
+import com.example.community.dto.*;
 import com.example.community.entity.history.post.PostHistory;
 import com.example.community.entity.main.post.Post;
 import com.example.community.entity.main.post.PostContent;
@@ -98,7 +96,7 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public Map<String, Object> postsPageLoadProcess(int page) {
+    public PostPageResponseDTO postsPageLoadProcess(int page) {
         if (page < 1) {
             throw new InvalidRequestException(ExceptionMessage.INVALID_PAGE.getMessage());
         }
@@ -108,22 +106,11 @@ public class PostService {
 
         Page<Post> postPage = postRepository.findPageWithUser(pageable);
 
-        List<PostSummaryDTO> posts = postPage.getContent().stream()
-                .map(PostSummaryDTO::new)
-                .toList();
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("posts", posts);
-        response.put("page", page);
-        response.put("posts_count", posts.size());
-        response.put("total_pages", postPage.getTotalPages());
-        response.put("total_count", postPage.getTotalElements());
-
-        return response;
+        return PostPageResponseDTO.of(postPage, page);
     }
 
     @Transactional
-    public Map<String, Object> getPostProcess(Long postId, Long userId) {
+    public PostDetailResponseDTO getPostProcess(Long postId, Long userId) {
         Post post = postRepository.findByIdWithUser(postId)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage()));
 
@@ -159,29 +146,10 @@ public class PostService {
             }
         }
 
-        // is_liked 응답 반환
         PostLikeId postLikeId = new PostLikeId(userId, postId);
         boolean isLiked = postLikeRepository.existsById(postLikeId);
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("post_id", post.getId());
-        response.put("post_title", post.getTitle());
-        response.put("post_content", postContent.getContent());
-        response.put("post_image", post.getImage());
-        response.put("created_at", post.getCreatedAt());
-        response.put("updated_at", post.getUpdatedAt());
-        response.put("like_count", post.getLikeCount());
-        response.put("is_liked", isLiked);
-        response.put("view_count", post.getViewCount());
-        response.put("report_count", post.getReportCount());
-        response.put("blinded_at", post.getBlindedAt());
-        response.put("comment_count", post.getCommentCount());
-
-        response.put("user_id", post.getUser().getId());
-        response.put("user_nickname", post.getUser().getNickname());
-        response.put("user_image", post.getUser().getImage());
-
-        return response;
+        return new PostDetailResponseDTO(post, postContent, isLiked);
     }
 
     @Transactional
@@ -234,7 +202,7 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public Map<String, Object> getPostInfo(Long postId, Long userId) {
+    public PostEditFormResponseDTO getPostInfo(Long postId, Long userId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage()));
 
@@ -249,22 +217,9 @@ public class PostService {
         PostContent postContent = postContentRepository.findById(postId)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.POST_CONTENT_NOT_FOUND.getMessage()));
 
-        Map<String, Object> postInfo = new HashMap<>();
-        postInfo.put("post_title", post.getTitle());
-        postInfo.put("post_content", postContent.getContent());
-        postInfo.put("post_image", post.getImage());
+        TempPost tempPost = tempPostRepository.findByPostId(postId).orElse(null);
 
-        Optional<TempPost> tempPost = tempPostRepository.findByPostId(postId);
-
-        if (tempPost.isPresent()) {
-            postInfo.put("has_temp_post", true);
-            postInfo.put("temp_post_id", tempPost.get().getId());
-            postInfo.put("temp_message", "수정 중인 임시 저장 글이 있습니다. 불러오시겠습니까?");
-        } else {
-            postInfo.put("has_temp_post", false);
-        }
-
-        return postInfo;
+        return PostEditFormResponseDTO.of(post, postContent, tempPost);
     }
 
     @Transactional
@@ -368,24 +323,11 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public Map<String, Object> getNewPostFormProcess(Long userId) {
+    public NewPostFormResponseDTO getNewPostFormProcess(Long userId) {
         Optional<TempPost> tempPost =
                 tempPostRepository.findFirstByUserIdAndPostIdIsNullOrderByIdDesc(userId);
 
-        Map<String, Object> response = new HashMap<>();
-
-        if (tempPost.isPresent()) {
-            response.put("has_temp_post", true);
-            response.put("temp_post_id", tempPost.get().getId());
-            response.put("message", "작성 중인 임시 저장 글이 있습니다. 불러오시겠습니까?");
-            return response;
-        }
-
-        response.put("has_temp_post", false);
-        return response;
+        return tempPost.map(NewPostFormResponseDTO::of)
+                .orElseGet(NewPostFormResponseDTO::noTempPost);
     }
-
-//    private boolean isBlinded() {
-//
-//    }
 }
