@@ -2,6 +2,7 @@ package com.example.community.controller;
 
 import com.example.community.common.ResponseFormat;
 import com.example.community.common.ResponseMessage;
+import com.example.community.dto.CommentsResponseDTO;
 import com.example.community.security.TokenProvider;
 import com.example.community.service.CommentService;
 import com.example.community.dto.CommentRequestDTO;
@@ -68,11 +69,12 @@ public class CommentController { // 댓글 관련 요청 처리
             HttpServletRequest request) {
 
         Long userId = tokenProvider.getUserId(request);
+        CommentsResponseDTO comments = commentService.getCommentsProcess(postId, userId);
 
         return ResponseEntity.ok(
                 ResponseFormat.of(
                         ResponseMessage.GET_COMMENTS_SUCCESS.getMessage(),
-                        Map.of("comments", commentService.getCommentsProcess(postId, userId))
+                        comments
                 )
         );
     }

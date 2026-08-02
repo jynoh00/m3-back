@@ -2,6 +2,8 @@ package com.example.community.service;
 
 import com.example.community.common.ExceptionMessage;
 import com.example.community.dto.CommentRequestDTO;
+import com.example.community.dto.CommentResponseDTO;
+import com.example.community.dto.CommentsResponseDTO;
 import com.example.community.entity.history.comment.CommentHistory;
 import com.example.community.entity.main.comment.Comment;
 import com.example.community.entity.main.post.Post;
@@ -122,7 +124,7 @@ public class CommentService {
     }
 
     @Transactional(readOnly = true)
-    public List<Map<String, Object>> getCommentsProcess(Long postId, Long userId) {
+    public CommentsResponseDTO getCommentsProcess(Long postId, Long userId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage()));
 
@@ -136,21 +138,10 @@ public class CommentService {
 
         List<Comment> comments = commentRepository.findAllByPostIdAndDeletedAtIsNullOrderByCreatedAtAsc(postId);
 
-        return comments.stream()
-                .map(comment -> {
-                    Map<String, Object> response = new HashMap<>();
-
-                    response.put("comment_id", comment.getId());
-                    response.put("comment_content", comment.getContent());
-                    response.put("created_at", comment.getCreatedAt());
-                    response.put("updated_at", comment.getUpdatedAt());
-
-                    response.put("user_id", comment.getUser().getId());
-                    response.put("user_nickname", comment.getUser().getNickname());
-                    response.put("user_image", comment.getUser().getImage());
-
-                    return response;
-                })
+        List<CommentResponseDTO> commentResponses = comments.stream()
+                .map(CommentResponseDTO::new)
                 .toList();
+
+        return new CommentsResponseDTO(commentResponses);
     }
 }
