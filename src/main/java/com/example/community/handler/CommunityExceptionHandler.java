@@ -1,7 +1,9 @@
 package com.example.community.handler;
 
 import com.example.community.common.ExceptionMessage;
+import com.example.community.common.RedirectPath;
 import com.example.community.common.ResponseFormat;
+import com.example.community.dto.RedirectResponseDTO;
 import com.example.community.exception.CommunityException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -43,7 +45,7 @@ public class CommunityExceptionHandler {
         HttpStatus status = HttpStatus.NOT_FOUND;
 
         return ResponseEntity.status(status).body(ResponseFormat.of(message,
-                Map.of("redirect_url", "/login")));
+                new RedirectResponseDTO(RedirectPath.LOGIN)));
     }
 
     @ExceptionHandler(CommunityException.class)

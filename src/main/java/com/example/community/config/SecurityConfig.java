@@ -1,7 +1,9 @@
 package com.example.community.config;
 
+import com.example.community.common.RedirectPath;
 import com.example.community.common.ResponseFormat;
 import com.example.community.common.ResponseMessage;
+import com.example.community.dto.RedirectResponseDTO;
 import com.example.community.security.AuthFilter;
 import com.example.community.common.PublicPaths;
 import jakarta.servlet.http.HttpServletResponse;
@@ -50,9 +52,9 @@ public class SecurityConfig {
                             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
                             response.setCharacterEncoding("UTF-8");
 
-                            ResponseFormat<Map<String, String>> responseBody = ResponseFormat.of(
+                            ResponseFormat<RedirectResponseDTO> responseBody = ResponseFormat.of(
                                     ResponseMessage.UNAUTHORIZED.getMessage(),
-                                    Map.of("redirect_url", "/login")
+                                    new RedirectResponseDTO(RedirectPath.LOGIN)
                             );
 
                             response.getWriter().write(objectMapper.writeValueAsString(responseBody));

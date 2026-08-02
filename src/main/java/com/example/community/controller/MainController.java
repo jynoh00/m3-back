@@ -1,7 +1,9 @@
 package com.example.community.controller;
 
+import com.example.community.common.RedirectPath;
 import com.example.community.common.ResponseFormat;
 import com.example.community.common.ResponseMessage;
+import com.example.community.dto.RedirectResponseDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,7 +16,7 @@ public class MainController { // 루트 경로 처리
     public ResponseEntity<?> index() {
         return ResponseEntity.ok(
                 ResponseFormat.of(ResponseMessage.AUTHORIZED.getMessage(),
-                        Map.of("redirect_url", "/posts")
+                        new RedirectResponseDTO(RedirectPath.POSTS)
                 )
         );
     }

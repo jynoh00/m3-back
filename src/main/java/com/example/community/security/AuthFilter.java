@@ -1,8 +1,10 @@
 package com.example.community.security;
 
 import com.example.community.common.PublicPaths;
+import com.example.community.common.RedirectPath;
 import com.example.community.common.ResponseFormat;
 import com.example.community.common.ResponseMessage;
+import com.example.community.dto.RedirectResponseDTO;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -97,9 +99,9 @@ public class AuthFilter extends OncePerRequestFilter {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding("UTF-8");
 
-        ResponseFormat<Map<String, String>> responseBody = ResponseFormat.of(
+        ResponseFormat<RedirectResponseDTO> responseBody = ResponseFormat.of(
                 ResponseMessage.ALREADY_AUTHORIZED.getMessage(),
-                Map.of("redirect_url", "/posts")
+                new RedirectResponseDTO(RedirectPath.POSTS)
         );
 
         response.getWriter().write(objectMapper.writeValueAsString(responseBody));
