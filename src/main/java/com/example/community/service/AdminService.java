@@ -1,6 +1,8 @@
 package com.example.community.service;
 
 import com.example.community.common.ExceptionMessage;
+import com.example.community.dto.PostPageResponseDTO;
+import com.example.community.dto.PostReportsResponseDTO;
 import com.example.community.dto.PostSummaryDTO;
 import com.example.community.entity.main.post.Post;
 import com.example.community.entity.main.post.report.PostReport;
@@ -27,7 +29,7 @@ public class AdminService {
     private final PostReportRepository postReportRepository;
 
     @Transactional(readOnly = true)
-    public Map<String, Object> getReportedPostsInfo(int page) {
+    public PostPageResponseDTO getReportedPostsInfo(int page) {
         if (page < 1) {
             throw new InvalidRequestException(ExceptionMessage.INVALID_PAGE.getMessage());
         }
@@ -37,46 +39,16 @@ public class AdminService {
 
         Page<Post> postPage = postRepository.findReportedPageWithUser(pageable);
 
-        List<PostSummaryDTO> posts = postPage.getContent().stream()
-                .map(PostSummaryDTO::new)
-                .toList();
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("posts", posts);
-        response.put("page", page);
-        response.put("posts_count", posts.size());
-        response.put("total_pages", postPage.getTotalPages());
-        response.put("total_count", postPage.getTotalElements());
-
-        return response;
+        return PostPageResponseDTO.of(postPage, page);
     }
 
     @Transactional(readOnly = true)
-    public Map<String, Object> getPostReportsInfo(Long postId) {
+    public PostReportsResponseDTO getPostReportsInfo(Long postId) {
         validatePostAccessAvailable(postId);
 
         List<PostReport> postReports = postReportRepository.findByPostIdWithUser(postId);
 
-        List<Map<String, Object>> reports = postReports.stream()
-                .map(postReport -> {
-                    Map<String, Object> reportMap = new HashMap<>();
-                    reportMap.put("post_id", postReport.getPost().getId());
-                    reportMap.put("user_id", postReport.getUser().getId());
-                    reportMap.put("user_nickname", postReport.getUser().getNickname());
-                    reportMap.put("user_image", postReport.getUser().getImage());
-                    reportMap.put("reason", postReport.getReason());
-                    reportMap.put("status", postReport.getStatus());
-                    reportMap.put("reported_at", postReport.getReportedAt());
-                    return reportMap;
-                })
-                .toList();
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("post_id", postId);
-        response.put("reports", reports);
-        response.put("reports_count", reports.size());
-
-        return response;
+        return PostReportsResponseDTO.of(postId, postReports);
     }
 
     @Transactional
