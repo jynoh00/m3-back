@@ -3,6 +3,7 @@ package com.example.community.config;
 import com.example.community.common.ResponseFormat;
 import com.example.community.common.ResponseMessage;
 import com.example.community.security.AuthFilter;
+import com.example.community.common.PublicPaths;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -36,10 +37,10 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/login", "/join").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/login", "/join").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/token").permitAll()
+                        .requestMatchers(PublicPaths.H2_CONSOLE + "/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, PublicPaths.LOGIN, PublicPaths.JOIN).permitAll()
+                        .requestMatchers(HttpMethod.POST, PublicPaths.LOGIN, PublicPaths.JOIN).permitAll()
+                        .requestMatchers(HttpMethod.POST, PublicPaths.TOKEN).permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

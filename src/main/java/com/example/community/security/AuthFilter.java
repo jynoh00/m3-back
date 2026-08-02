@@ -1,5 +1,6 @@
 package com.example.community.security;
 
+import com.example.community.common.PublicPaths;
 import com.example.community.common.ResponseFormat;
 import com.example.community.common.ResponseMessage;
 import jakarta.servlet.FilterChain;
@@ -9,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -62,8 +64,8 @@ public class AuthFilter extends OncePerRequestFilter {
         String method = request.getMethod();
         String path = request.getRequestURI();
 
-        return ("GET".equals(method) || "POST".equals(method))
-                && ("/login".equals(path) || "/join".equals(path));
+        return (HttpMethod.GET.matches(method) || HttpMethod.POST.matches(method))
+                && (PublicPaths.LOGIN.equals(path) || PublicPaths.JOIN.equals(path));
     }
 
     private void handleAuthPageRequest(String authorization,
@@ -107,7 +109,7 @@ public class AuthFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
 
-        return path.startsWith("/h2-console")
-                || "OPTIONS".equals(request.getMethod());
+        return path.startsWith(PublicPaths.H2_CONSOLE)
+                || HttpMethod.OPTIONS.matches(request.getMethod());
     }
 }
