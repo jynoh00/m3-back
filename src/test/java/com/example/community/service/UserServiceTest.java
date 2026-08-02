@@ -1,9 +1,7 @@
 package com.example.community.service;
 
 import com.example.community.common.ExceptionMessage;
-import com.example.community.dto.JoinRequestDTO;
-import com.example.community.dto.UpdatePasswordDTO;
-import com.example.community.dto.UpdateProfileRequestDTO;
+import com.example.community.dto.*;
 import com.example.community.entity.history.user.UserHistory;
 import com.example.community.entity.main.user.User;
 import com.example.community.exception.DuplicateResourceException;
@@ -24,7 +22,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.Map;
 import java.util.Optional;
 
 import static com.example.community.TestUserConstant.*;
@@ -219,11 +216,11 @@ class UserServiceTest {
 
         when(userRepository.findById(NORMAL.id)).thenReturn(Optional.of(user));
 
-        Map<String, Object> result = userService.getUserInfo(NORMAL.id);
+        UserInfoResponseDTO result = userService.getUserInfo(NORMAL.id);
 
-        assertThat(result.get(RESPONSE_EMAIL)).isEqualTo(NORMAL.email);
-        assertThat(result.get(RESPONSE_NICKNAME)).isEqualTo(NORMAL.nickname);
-        assertThat(result.get(RESPONSE_IMAGE)).isNotNull();
+        assertThat(result.getUserEmail()).isEqualTo(NORMAL.email);
+        assertThat(result.getUserNickname()).isEqualTo(NORMAL.nickname);
+        assertThat(result.getUserImage()).isNotNull();
     }
 
     @Test
@@ -233,14 +230,14 @@ class UserServiceTest {
         when(userRepository.findById(BEFORE_UPDATE.id)).thenReturn(Optional.of(user));
         when(userRepository.existsByNickname(AFTER_UPDATE.nickname)).thenReturn(false);
 
-        Map<String, Object> result = userService.updateProfileProcess(
+        UserProfileUpdateResponseDTO result = userService.updateProfileProcess(
                 AFTER_UPDATE.nickname,
                 AFTER_UPDATE.image,
                 BEFORE_UPDATE.id
         );
 
-        assertThat(result.get(RESPONSE_NICKNAME)).isEqualTo(AFTER_UPDATE.nickname);
-        assertThat(result.get(RESPONSE_IMAGE)).isEqualTo(AFTER_UPDATE.image);
+        assertThat(result.getUserNickname()).isEqualTo(AFTER_UPDATE.nickname);
+        assertThat(result.getUserImage()).isEqualTo(AFTER_UPDATE.image);
         assertThat(user.getNickname()).isEqualTo(AFTER_UPDATE.nickname);
         assertThat(user.getImage()).isEqualTo(AFTER_UPDATE.image);
     }
@@ -415,14 +412,14 @@ class UserServiceTest {
 
         when(userRepository.findById(BEFORE_UPDATE.id)).thenReturn(Optional.of(user));
 
-        Map<String, Object> result = userService.updateProfileProcess(
+        UserProfileUpdateResponseDTO result = userService.updateProfileProcess(
                 BEFORE_UPDATE.nickname,
                 AFTER_UPDATE.image,
                 BEFORE_UPDATE.id
         );
 
-        assertThat(result.get("user_nickname")).isEqualTo(BEFORE_UPDATE.nickname);
-        assertThat(result.get("user_image")).isEqualTo(AFTER_UPDATE.image);
+        assertThat(result.getUserNickname()).isEqualTo(BEFORE_UPDATE.nickname);
+        assertThat(result.getUserImage()).isEqualTo(AFTER_UPDATE.image);
 
         verify(userRepository, never()).existsByNickname(anyString());
         verify(userHistoryRepository).save(any(UserHistory.class));

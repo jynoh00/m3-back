@@ -3,6 +3,8 @@ package com.example.community.service;
 import com.example.community.common.ExceptionMessage;
 import com.example.community.dto.JoinRequestDTO;
 import com.example.community.dto.UpdatePasswordDTO;
+import com.example.community.dto.UserInfoResponseDTO;
+import com.example.community.dto.UserProfileUpdateResponseDTO;
 import com.example.community.entity.history.user.UserHistory;
 import com.example.community.entity.main.user.User;
 import com.example.community.exception.DuplicateResourceException;
@@ -53,21 +55,15 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public Map<String, Object> getUserInfo(Long userId) {
+    public UserInfoResponseDTO getUserInfo(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.USER_NOT_FOUND.getMessage()));
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("user_id", user.getId());
-        response.put("user_email", user.getEmail());
-        response.put("user_nickname", user.getNickname());
-        response.put("user_image", user.getImage());
-
-        return response;
+        return new UserInfoResponseDTO(user);
     }
 
     @Transactional
-    public Map<String, Object> updateProfileProcess(String userNewNickname, String userNewImage, Long userId) {
+    public UserProfileUpdateResponseDTO updateProfileProcess(String userNewNickname, String userNewImage, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.USER_NOT_FOUND.getMessage()));
 
@@ -83,12 +79,7 @@ public class UserService {
 
         user.updateProfile(userNewNickname, userNewImage);
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("user_id", user.getId());
-        response.put("user_nickname", user.getNickname());
-        response.put("user_image", user.getImage());
-
-        return response;
+        return new UserProfileUpdateResponseDTO(user);
     }
 
     @Transactional

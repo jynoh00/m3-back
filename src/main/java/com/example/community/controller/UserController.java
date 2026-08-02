@@ -2,11 +2,9 @@ package com.example.community.controller;
 
 import com.example.community.common.ResponseFormat;
 import com.example.community.common.ResponseMessage;
+import com.example.community.dto.*;
 import com.example.community.security.TokenProvider;
 import com.example.community.service.UserService;
-import com.example.community.dto.JoinRequestDTO;
-import com.example.community.dto.UpdatePasswordDTO;
-import com.example.community.dto.UpdateProfileRequestDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +40,7 @@ public class UserController { // 사용자 정보 관련 요청 처리
     @GetMapping("/me/profile")
     public ResponseEntity<?> getProfileEditForm(HttpServletRequest request) {
         Long userId = tokenProvider.getUserId(request);
-        Map<String, Object> userInfo = userService.getUserInfo(userId);
+        UserInfoResponseDTO userInfo = userService.getUserInfo(userId);
         return ResponseEntity.ok(
                 ResponseFormat.of(ResponseMessage.USER_PROFILE_EDIT_PAGE_LOAD.getMessage(), userInfo)
         );
@@ -54,7 +52,7 @@ public class UserController { // 사용자 정보 관련 요청 처리
             HttpServletRequest request) {
 
         Long userId = tokenProvider.getUserId(request);
-        Map<String, Object> userInfo = userService.updateProfileProcess(
+        UserProfileUpdateResponseDTO userInfo = userService.updateProfileProcess(
                 updateProfileRequestDTO.getUserNewNickname(),
                 updateProfileRequestDTO.getUserNewImage(),
                 userId
