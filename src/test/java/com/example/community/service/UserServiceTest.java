@@ -32,8 +32,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
-    private static final String USER_NOT_FOUND_MESSAGE = "user_not_found";
-    private static final String NO_USER_UPDATE_CHANGES_MESSAGE = "no_user_update_changes";
+    private static final String USER_NOT_FOUND_MESSAGE = ExceptionMessage.USER_NOT_FOUND.getMessage();
+    private static final String NO_USER_UPDATE_CHANGES_MESSAGE = ExceptionMessage.NO_USER_UPDATE_CHANGES.getMessage();
 
     private static final String MISMATCH_PASSWORD_MESSAGE = "mismatch_user_password";
 
@@ -366,7 +366,7 @@ class UserServiceTest {
 
         assertThatThrownBy(() -> userService.joinProcess(request))
                 .isInstanceOf(InvalidRequestException.class)
-                .hasMessage("mismatch_user_password");
+                .hasMessage(MISMATCH_PASSWORD_MESSAGE);
 
         verify(userRepository, never()).existsByEmail(anyString());
         verify(userRepository, never()).existsByNickname(anyString());
