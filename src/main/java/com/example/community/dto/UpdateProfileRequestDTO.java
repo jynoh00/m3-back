@@ -1,5 +1,6 @@
 package com.example.community.dto;
 
+import com.example.community.common.ValidationMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -10,12 +11,12 @@ import lombok.Getter;
 public class UpdateProfileRequestDTO {
 
     @JsonProperty("user_new_nickname")
-    @NotBlank(message = "nickname_required")
-    @Size(min = 2, max = 10, message = "invalid_nickname_length")
-    @Pattern(regexp = "^\\S+$", message = "invalid_nickname_blank")
+    @NotBlank(message = ValidationMessage.NICKNAME_REQUIRED)
+    @Size(min = 2, max = 10, message = ValidationMessage.INVALID_NICKNAME_LENGTH)
+    @Pattern(regexp = ValidationMessage.NICKNAME_PATTERN, message = ValidationMessage.INVALID_NICKNAME_BLANK)
     private String userNewNickname;
 
     @JsonProperty("user_new_image")
-    @NotBlank(message = "user_image_required")
+    @NotBlank(message = ValidationMessage.USER_IMAGE_REQUIRED)
     private String userNewImage;
 }

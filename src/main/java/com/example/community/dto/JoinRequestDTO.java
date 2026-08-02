@@ -1,5 +1,6 @@
 package com.example.community.dto;
 
+import com.example.community.common.ValidationMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -10,29 +11,29 @@ import lombok.Getter;
 @Getter
 public class JoinRequestDTO {
     @JsonProperty("user_email")
-    @NotBlank(message = "email_required")
-    @Email(message = "invalid_email_format")
+    @NotBlank(message = ValidationMessage.EMAIL_REQUIRED)
+    @Email(message = ValidationMessage.INVALID_EMAIL_FORMAT)
     private String userEmail;
 
     @JsonProperty("user_nickname")
-    @NotBlank(message = "nickname_required")
-    @Size(min = 2, max = 10, message = "invalid_nickname_length")
-    @Pattern(regexp = "^\\S+$", message = "invalid_nickname_blank")
+    @NotBlank(message = ValidationMessage.NICKNAME_REQUIRED)
+    @Size(min = 2, max = 10, message = ValidationMessage.INVALID_NICKNAME_LENGTH)
+    @Pattern(regexp = ValidationMessage.NICKNAME_PATTERN, message = ValidationMessage.INVALID_NICKNAME_BLANK)
     private String userNickname;
 
 
     @JsonProperty("user_password")
-    @NotBlank(message = "password_required")
-    @Size(min = 8, max = 20, message = "invalid_password_length")
-    @Pattern(regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[^A-Za-z0-9])\\S+$"
-            , message = "invalid_password_format")
+    @NotBlank(message = ValidationMessage.PASSWORD_REQUIRED)
+    @Size(min = 8, max = 20, message = ValidationMessage.INVALID_PASSWORD_LENGTH)
+    @Pattern(regexp = ValidationMessage.PASSWORD_PATTERN
+            , message = ValidationMessage.INVALID_PASSWORD_FORMAT)
     private String userPassword;
 
     @JsonProperty("user_password_check")
-    @NotBlank(message = "password_check_required")
-    @Size(min = 8, max = 20, message = "invalid_password_check_length")
-    @Pattern(regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[^A-Za-z0-9])\\S+$"
-            , message = "invalid_password_check_format")
+    @NotBlank(message = ValidationMessage.PASSWORD_CHECK_REQUIRED)
+    @Size(min = 8, max = 20, message = ValidationMessage.INVALID_PASSWORD_CHECK_LENGTH)
+    @Pattern(regexp = ValidationMessage.PASSWORD_PATTERN
+            , message = ValidationMessage.INVALID_PASSWORD_CHECK_FORMAT)
     private String userPasswordCheck;
 
     @JsonProperty("user_image")
