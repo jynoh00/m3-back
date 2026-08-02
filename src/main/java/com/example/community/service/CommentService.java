@@ -122,10 +122,6 @@ public class CommentService {
 
     @Transactional(readOnly = true)
     public List<Map<String, Object>> getCommentsProcess(Long postId, Long userId) {
-        if (!postRepository.existsById(postId)) {
-            throw new NotFoundException("post_not_found");
-        }
-
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new NotFoundException("post_not_found"));
 
