@@ -2,6 +2,7 @@ package com.example.community.service;
 
 import com.example.community.common.UserRole;
 import com.example.community.dto.LoginRequestDTO;
+import com.example.community.dto.LoginResponseDTO;
 import com.example.community.entity.main.auth.RefreshToken;
 import com.example.community.entity.main.user.User;
 import com.example.community.exception.AuthenticationException;
@@ -13,6 +14,7 @@ import com.example.community.security.PasswordEncoder;
 import com.example.community.security.RefreshTokenInfo;
 import com.example.community.security.TokenProvider;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +31,7 @@ public class AuthService {
     private final TokenProvider tokenProvider;
 
     @Transactional
-    public Map<String, Object> loginProcess(LoginRequestDTO loginRequestDTO) {
+    public LoginResponseDTO loginProcess(LoginRequestDTO loginRequestDTO) {
         // 사용자 확인
         User user = authenticateUser(loginRequestDTO.getUserEmail(), loginRequestDTO.getUserPassword());
 
@@ -42,15 +44,14 @@ public class AuthService {
         );
         refreshTokenRepository.save(refreshToken);
 
-        // 응답 생성 - 응답 DTO로 관리하도록 변경할 것
-        Map<String, Object> response = new HashMap<>();
-        response.put("user_nickname", user.getNickname());
-        response.put("user_email", user.getEmail());
-        response.put("user_image", user.getImage());
-        response.put("access_token", accessToken);
-        response.put("refresh_token", refreshTokenInfo.getValue());
-        response.put("user_id", user.getId());
-        return response;
+        return new LoginResponseDTO(
+                user.getId(),
+                user.getEmail(),
+                user.getNickname(),
+                user.getImage(),
+                accessToken,
+                refreshTokenInfo.getValue()
+        );
     }
 
     @Transactional(noRollbackFor = ExpiredRefreshTokenException.class)

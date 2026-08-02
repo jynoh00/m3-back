@@ -3,6 +3,7 @@ package com.example.community.service;
 import com.example.community.common.ExceptionMessage;
 import com.example.community.common.UserRole;
 import com.example.community.dto.LoginRequestDTO;
+import com.example.community.dto.LoginResponseDTO;
 import com.example.community.entity.main.auth.RefreshToken;
 import com.example.community.entity.main.user.User;
 import com.example.community.exception.AuthenticationException;
@@ -74,14 +75,14 @@ class AuthServiceTest {
         when(tokenProvider.createRefreshToken(NORMAL.id))
                 .thenReturn(new RefreshTokenInfo(REFRESH_TOKEN, LocalDateTime.now().plusDays(1)));
 
-        Map<String, Object> result = authService.loginProcess(request);
+        LoginResponseDTO result = authService.loginProcess(request);
 
-        assertThat(result.get(RESPONSE_USER_ID)).isEqualTo(NORMAL.id);
-        assertThat(result.get(RESPONSE_EMAIL)).isEqualTo(NORMAL.email);
-        assertThat(result.get(RESPONSE_NICKNAME)).isEqualTo(NORMAL.nickname);
-        assertThat(result.get(RESPONSE_IMAGE)).isNotNull();
-        assertThat(result.get(RESPONSE_ACCESS_TOKEN)).isEqualTo(ACCESS_TOKEN);
-        assertThat(result.get(RESPONSE_REFRESH_TOKEN)).isEqualTo(REFRESH_TOKEN);
+        assertThat(result.getUserId()).isEqualTo(NORMAL.id);
+        assertThat(result.getUserEmail()).isEqualTo(NORMAL.email);
+        assertThat(result.getUserNickname()).isEqualTo(NORMAL.nickname);
+        assertThat(result.getUserImage()).isNotNull();
+        assertThat(result.getAccessToken()).isEqualTo(ACCESS_TOKEN);
+        assertThat(result.getRefreshToken()).isEqualTo(REFRESH_TOKEN);
 
         ArgumentCaptor<RefreshToken> captor = ArgumentCaptor.forClass(RefreshToken.class);
         verify(refreshTokenRepository).save(captor.capture());
