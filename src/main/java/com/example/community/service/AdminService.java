@@ -1,5 +1,6 @@
 package com.example.community.service;
 
+import com.example.community.common.ExceptionMessage;
 import com.example.community.dto.PostSummaryDTO;
 import com.example.community.entity.main.post.Post;
 import com.example.community.entity.main.post.report.PostReport;
@@ -28,7 +29,7 @@ public class AdminService {
     @Transactional(readOnly = true)
     public Map<String, Object> getReportedPostsInfo(int page) {
         if (page < 1) {
-            throw new InvalidRequestException("invalid_page");
+            throw new InvalidRequestException(ExceptionMessage.INVALID_PAGE.getMessage());
         }
 
         int pageSize = 10;
@@ -81,7 +82,7 @@ public class AdminService {
     @Transactional
     public void tryBlindPostProcess(Long postId) {
         Post post = postRepository.findByIdWithUser(postId)
-                .orElseThrow(() -> new NotFoundException("post_not_found"));
+                .orElseThrow(() -> new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage()));
 
         validatePostAccessAvailable(post);
         List<PostReport> postReports = postReportRepository.findByPostId(postId);
@@ -93,10 +94,10 @@ public class AdminService {
     @Transactional
     public void tryRejectReportsInPostProcess(Long postId) {
         Post post = postRepository.findByIdWithUser(postId)
-                .orElseThrow(() -> new NotFoundException("post_not_found"));
+                .orElseThrow(() -> new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage()));
 
         if (post.getDeletedAt() != null) {
-            throw new NotFoundException("post_deleted");
+            throw new NotFoundException(ExceptionMessage.POST_DELETED.getMessage());
         }
 
         validatePostAccessAvailable(post);
@@ -108,24 +109,24 @@ public class AdminService {
 
     private void validatePostAccessAvailable(Long postId) {
         Post post = postRepository.findByIdWithUser(postId)
-                .orElseThrow(() -> new NotFoundException("post_not_found"));
+                .orElseThrow(() -> new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage()));
 
         if (post.getDeletedAt() != null) {
-            throw new NotFoundException("post_deleted");
+            throw new NotFoundException(ExceptionMessage.POST_DELETED.getMessage());
         }
 
         if (post.getBlindedAt() != null) {
-            throw new BlindedPostAccessException("already_blinded_post");
+            throw new BlindedPostAccessException(ExceptionMessage.ALREADY_BLINDED_POST.getMessage());
         }
     }
 
     private void validatePostAccessAvailable(Post post) {
         if (post.getDeletedAt() != null) {
-            throw new NotFoundException("post_deleted");
+            throw new NotFoundException(ExceptionMessage.POST_DELETED.getMessage());
         }
 
         if (post.getBlindedAt() != null) {
-            throw new BlindedPostAccessException("already_blinded_post");
+            throw new BlindedPostAccessException(ExceptionMessage.ALREADY_BLINDED_POST.getMessage());
         }
     }
 }

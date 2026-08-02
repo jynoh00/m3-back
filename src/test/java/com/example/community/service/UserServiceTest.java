@@ -1,5 +1,6 @@
 package com.example.community.service;
 
+import com.example.community.common.ExceptionMessage;
 import com.example.community.dto.JoinRequestDTO;
 import com.example.community.dto.UpdatePasswordDTO;
 import com.example.community.dto.UpdateProfileRequestDTO;
@@ -52,8 +53,8 @@ class UserServiceTest {
     private static final String RESPONSE_NICKNAME = "user_nickname";
     private static final String RESPONSE_IMAGE = "user_image";
 
-    private static final String DUPLICATED_EMAIL_MESSAGE = "duplicated_user_email";
-    private static final String DUPLICATED_NICKNAME_MESSAGE = "duplicated_user_nickname";
+    private static final String DUPLICATED_EMAIL_MESSAGE = ExceptionMessage.DUPLICATED_USER_EMAIL.getMessage();
+    private static final String DUPLICATED_NICKNAME_MESSAGE = ExceptionMessage.DUPLICATED_USER_NICKNAME.getMessage();
 
     @Mock
     UserRepository userRepository;

@@ -1,5 +1,6 @@
 package com.example.community.service;
 
+import com.example.community.common.ExceptionMessage;
 import com.example.community.dto.JoinRequestDTO;
 import com.example.community.dto.UpdatePasswordDTO;
 import com.example.community.entity.history.user.UserHistory;
@@ -54,7 +55,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public Map<String, Object> getUserInfo(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("user_not_found"));
+                .orElseThrow(() -> new NotFoundException(ExceptionMessage.USER_NOT_FOUND.getMessage()));
 
         Map<String, Object> response = new HashMap<>();
         response.put("user_id", user.getId());
@@ -68,7 +69,7 @@ public class UserService {
     @Transactional
     public Map<String, Object> updateProfileProcess(String userNewNickname, String userNewImage, Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("user_not_found"));
+                .orElseThrow(() -> new NotFoundException(ExceptionMessage.USER_NOT_FOUND.getMessage()));
 
         validateUserProfileChange(user, userNewNickname, userNewImage);
 
@@ -98,7 +99,7 @@ public class UserService {
         passwordCheck(userNewPassword, userNewPasswordCheck);
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("user_not_found"));
+                .orElseThrow(() -> new NotFoundException(ExceptionMessage.USER_NOT_FOUND.getMessage()));
 
         user.updatePassword(passwordEncoding(userNewPassword));
     }
@@ -106,10 +107,10 @@ public class UserService {
     @Transactional
     public void withdrawProcess(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("user_not_found"));
+                .orElseThrow(() -> new NotFoundException(ExceptionMessage.USER_NOT_FOUND.getMessage()));
 
         if (user.getDeletedAt() != null) {
-            throw new NotFoundException("user_not_found");
+            throw new NotFoundException(ExceptionMessage.USER_NOT_FOUND.getMessage());
         }
 
         refreshTokenRepository.deleteByUserId(userId);
@@ -124,19 +125,19 @@ public class UserService {
 
     private void duplicatedCheckEmail(String userEmail) {
         if (userRepository.existsByEmail(userEmail)) {
-            throw new DuplicateResourceException("duplicated_user_email");
+            throw new DuplicateResourceException(ExceptionMessage.DUPLICATED_USER_EMAIL.getMessage());
         }
     }
 
     private void duplicatedCheckNickname(String userNickname) {
         if (userRepository.existsByNickname(userNickname)) {
-            throw new DuplicateResourceException("duplicated_user_nickname");
+            throw new DuplicateResourceException(ExceptionMessage.DUPLICATED_USER_NICKNAME.getMessage());
         }
     }
 
     private void passwordCheck(String userPassword, String userPasswordCheck) {
         if (!userPassword.equals(userPasswordCheck)) {
-            throw new InvalidRequestException("mismatch_user_password");
+            throw new InvalidRequestException(ExceptionMessage.MISMATCH_USER_PASSWORD.getMessage());
         }
     }
 
@@ -152,7 +153,7 @@ public class UserService {
         boolean imageChanged = !Objects.equals(userNewImage, beforeImage);
 
         if (!nicknameChanged && !imageChanged) {
-            throw new InvalidRequestException("no_user_update_changes");
+            throw new InvalidRequestException(ExceptionMessage.NO_USER_UPDATE_CHANGES.getMessage());
         }
 
         if (nicknameChanged) {

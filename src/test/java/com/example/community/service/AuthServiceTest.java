@@ -38,7 +38,7 @@ class AuthServiceTest {
     private static final String REFRESH_TOKEN = "refresh-token";
 
     private static final String BEARER_REFRESH_TOKEN = "Bearer " + REFRESH_TOKEN;
-    private static final String INVALID_REFRESH_TOKEN_MESSAGE = "invalid_refresh_token";
+    private static final String INVALID_REFRESH_TOKEN_MESSAGE = ExceptionMessage.INVALID_REFRESH_TOKEN.getMessage();
 
     private static final String RESPONSE_USER_ID = "user_id";
     private static final String RESPONSE_EMAIL = "user_email";
@@ -47,7 +47,7 @@ class AuthServiceTest {
     private static final String RESPONSE_ACCESS_TOKEN = "access_token";
     private static final String RESPONSE_REFRESH_TOKEN = "refresh_token";
 
-    private static final String PASSWORD_FAILED_MESSAGE = "password_failed";
+    private static final String PASSWORD_FAILED_MESSAGE = ExceptionMessage.PASSWORD_FAILED.getMessage();
 
     @Mock
     UserRepository userRepository;

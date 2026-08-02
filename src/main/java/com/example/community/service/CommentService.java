@@ -1,5 +1,6 @@
 package com.example.community.service;
 
+import com.example.community.common.ExceptionMessage;
 import com.example.community.dto.CommentRequestDTO;
 import com.example.community.entity.history.comment.CommentHistory;
 import com.example.community.entity.main.comment.Comment;
@@ -30,19 +31,19 @@ public class CommentService {
     @Transactional
     public Long createCommentProcess(Long postId, CommentRequestDTO commentRequestDTO, Long userId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new NotFoundException("post_not_found"));
+                .orElseThrow(() -> new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage()));
 
         if (post.getDeletedAt() != null) {
-            throw new NotFoundException("post_not_found");
+            throw new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage());
         }
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("user_not_found"));
+                .orElseThrow(() -> new NotFoundException(ExceptionMessage.USER_NOT_FOUND.getMessage()));
 
         Comment parentComment = commentRequestDTO.getParentCommentId() == null
                 ? null
                 : commentRepository.findById(commentRequestDTO.getParentCommentId())
-                  .orElseThrow(() -> new NotFoundException("comment_not_found"));
+                  .orElseThrow(() -> new NotFoundException(ExceptionMessage.COMMENT_NOT_FOUND.getMessage()));
 
         Comment comment = new Comment(
                 post,
@@ -60,26 +61,26 @@ public class CommentService {
     @Transactional
     public void editCommentProcess(Long postId, Long commentId, CommentRequestDTO commentRequestDTO, Long userId) {
         if (!postRepository.existsById(postId)) {
-            throw new NotFoundException("post_not_found");
+            throw new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage());
         }
 
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new NotFoundException("comment_not_found"));
+                .orElseThrow(() -> new NotFoundException(ExceptionMessage.COMMENT_NOT_FOUND.getMessage()));
 
         if (comment.getPost().getDeletedAt() != null) {
-            throw new NotFoundException("post_not_found");
+            throw new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage());
         }
 
         if (!comment.getPost().getId().equals(postId)) {
-            throw new NotFoundException("comment_not_in_post");
+            throw new NotFoundException(ExceptionMessage.COMMENT_NOT_IN_POST.getMessage());
         }
 
         if (comment.getDeletedAt() != null) {
-            throw new NotFoundException("comment_not_found");
+            throw new NotFoundException(ExceptionMessage.COMMENT_NOT_FOUND.getMessage());
         }
 
         if (!comment.getUser().getId().equals(userId)) {
-            throw new AuthorizationException("comment_edit_forbidden");
+            throw new AuthorizationException(ExceptionMessage.COMMENT_EDIT_FORBIDDEN.getMessage());
         }
 
         CommentHistory commentHistory = new CommentHistory(
@@ -94,26 +95,26 @@ public class CommentService {
     @Transactional
     public void deleteCommentProcess(Long postId, Long commentId, Long userId) {
         if (!postRepository.existsById(postId)) {
-            throw new NotFoundException("post_not_found");
+            throw new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage());
         }
 
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new NotFoundException("comment_not_found"));
+                .orElseThrow(() -> new NotFoundException(ExceptionMessage.COMMENT_NOT_FOUND.getMessage()));
 
         if (comment.getPost().getDeletedAt() != null) {
-            throw new NotFoundException("post_not_found");
+            throw new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage());
         }
 
         if (comment.getDeletedAt() != null) {
-            throw new NotFoundException("comment_not_found");
+            throw new NotFoundException(ExceptionMessage.COMMENT_NOT_FOUND.getMessage());
         }
 
         if (!comment.getPost().getId().equals(postId)) {
-            throw new NotFoundException("comment_not_in_post");
+            throw new NotFoundException(ExceptionMessage.COMMENT_NOT_IN_POST.getMessage());
         }
 
         if (!comment.getUser().getId().equals(userId)) {
-            throw new AuthorizationException("comment_delete_forbidden");
+            throw new AuthorizationException(ExceptionMessage.COMMENT_DELETE_FORBIDDEN.getMessage());
         }
 
         comment.delete(); // soft delete, 이후 더티체킹
@@ -123,15 +124,15 @@ public class CommentService {
     @Transactional(readOnly = true)
     public List<Map<String, Object>> getCommentsProcess(Long postId, Long userId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new NotFoundException("post_not_found"));
+                .orElseThrow(() -> new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage()));
 
         if (post.getDeletedAt() != null) {
-            throw new NotFoundException("post_not_found");
+            throw new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage());
         }
 
 
         userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("user_not_found"));
+                .orElseThrow(() -> new NotFoundException(ExceptionMessage.USER_NOT_FOUND.getMessage()));
 
         List<Comment> comments = commentRepository.findAllByPostIdAndDeletedAtIsNullOrderByCreatedAtAsc(postId);
 

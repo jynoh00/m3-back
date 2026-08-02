@@ -1,5 +1,6 @@
 package com.example.community.service;
 
+import com.example.community.common.ExceptionMessage;
 import com.example.community.common.UserRole;
 import com.example.community.dto.LoginRequestDTO;
 import com.example.community.dto.LoginResponseDTO;
@@ -57,27 +58,27 @@ public class AuthService {
     @Transactional(noRollbackFor = ExpiredRefreshTokenException.class)
     public String refreshAccessToken(String authorization) {
         if (authorization == null || !authorization.startsWith("Bearer ")) {
-            throw new AuthenticationException("invalid_refresh_token");
+            throw new AuthenticationException(ExceptionMessage.INVALID_REFRESH_TOKEN.getMessage());
         }
 
         String refreshTokenValue = authorization.substring(7);
 
         if (!tokenProvider.validateRefreshToken(refreshTokenValue)) {
-            throw new AuthenticationException("invalid_refresh_token");
+            throw new AuthenticationException(ExceptionMessage.INVALID_REFRESH_TOKEN.getMessage());
         }
 
         Long userId = tokenProvider.getUserId(refreshTokenValue);
 
         RefreshToken refreshToken = refreshTokenRepository.findByToken(refreshTokenValue)
-                .orElseThrow(() -> new AuthenticationException("invalid_refresh_token"));
+                .orElseThrow(() -> new AuthenticationException(ExceptionMessage.INVALID_REFRESH_TOKEN.getMessage()));
 
         if (!refreshToken.getUser().getId().equals(userId)) {
-            throw new AuthenticationException("invalid_refresh_token");
+            throw new AuthenticationException(ExceptionMessage.INVALID_REFRESH_TOKEN.getMessage());
         }
 
         if (refreshToken.getExpiresAt().isBefore(LocalDateTime.now())) {
             refreshTokenRepository.delete(refreshToken);
-            throw new ExpiredRefreshTokenException("expired_refresh_token"); // 해당 예외 발생 시 롤백 안되게 설정
+            throw new ExpiredRefreshTokenException(ExceptionMessage.EXPIRED_REFRESH_TOKEN.getMessage()); // 해당 예외 발생 시 롤백 안되게 설정
         }
 
         return tokenProvider.createAccessToken(userId, refreshToken.getUser().getRole());
@@ -85,10 +86,10 @@ public class AuthService {
 
     private User authenticateUser(String userEmail, String userPassword) {
         User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new NotFoundException("user_email_not_found"));
+                .orElseThrow(() -> new NotFoundException(ExceptionMessage.USER_EMAIL_NOT_FOUND.getMessage()));
 
         if (!passwordEncoder.matches(userPassword, user.getPassword())) {
-            throw new AuthenticationException("password_failed");
+            throw new AuthenticationException(ExceptionMessage.PASSWORD_FAILED.getMessage());
         }
 
         return user;
@@ -97,13 +98,13 @@ public class AuthService {
     @Transactional
     public void logoutProcess(String authorization) {
         if (authorization == null || !authorization.startsWith("Bearer ")) {
-            throw new AuthenticationException("invalid_refresh_token");
+            throw new AuthenticationException(ExceptionMessage.INVALID_REFRESH_TOKEN.getMessage());
         }
 
         String refreshTokenValue = authorization.substring(7);
 
         RefreshToken refreshToken = refreshTokenRepository.findByToken(refreshTokenValue)
-                .orElseThrow(() -> new AuthenticationException("invalid_refresh_token"));
+                .orElseThrow(() -> new AuthenticationException(ExceptionMessage.INVALID_REFRESH_TOKEN.getMessage()));
 
         refreshTokenRepository.delete(refreshToken);
     }

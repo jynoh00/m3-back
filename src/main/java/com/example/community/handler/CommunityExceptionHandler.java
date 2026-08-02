@@ -39,7 +39,7 @@ public class CommunityExceptionHandler {
     // 404 - 존재하지 않는 URL
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<?> noResourceFoundException(NoResourceFoundException e) {
-        String message = "not_found_url";
+        String message = ExceptionMessage.NOT_FOUND_URL.getMessage();
         HttpStatus status = HttpStatus.NOT_FOUND;
 
         return ResponseEntity.status(status).body(ResponseFormat.of(message,
