@@ -29,7 +29,7 @@ public final class ValidationMessage {
     public static final String PASSWORD_PATTERN =
             "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[^A-Za-z0-9])\\S+$";
     public static final String NICKNAME_PATTERN = "^\\S+$";
-g
+
     private ValidationMessage() {
     }
 }
