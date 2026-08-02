@@ -18,20 +18,23 @@ import java.util.Objects;
 @Component
 public class JWTProvider implements TokenProvider {
 
-    private static final long ACCESS_TOKEN_EXPIRE_MILLIS = 1000L * 60 * 30;
-    private static final long REFRESH_TOKEN_EXPIRE_MILLIS = 1000L * 60 * 60 * 24 * 7;
-
     private final SecretKey secretKey;
-    // 따로 빼서 관리
+    private final long accessTokenExpireMillis;
+    private final long refreshTokenExpireMillis;
 
-    public JWTProvider(@Value("${jwt.secret}") String secret) {
+    public JWTProvider(@Value("${jwt.secret}") String secret,
+                       @Value("${jwt.access-token-expire-minutes}") long accessTokenExpireMinutes,
+                       @Value("${jwt.refresh-token-expire-days}") long refreshTokenExpireDays) {
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+
+        this.accessTokenExpireMillis = 1000L * 60 * accessTokenExpireMinutes;
+        this.refreshTokenExpireMillis = 1000L * 60 * 60 * 24 * refreshTokenExpireDays;
     }
 
     @Override
     public String createAccessToken(Long userId, String role) {
         Date now = new Date();
-        Date expiration = new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_MILLIS);
+        Date expiration = new Date(now.getTime() + accessTokenExpireMillis);
 
         return Jwts.builder()
                 .subject(String.valueOf(userId))
@@ -46,7 +49,7 @@ public class JWTProvider implements TokenProvider {
     @Override
     public RefreshTokenInfo createRefreshToken(Long userId) {
         Date now = new Date();
-        Date expiration = new Date(now.getTime() + REFRESH_TOKEN_EXPIRE_MILLIS);
+        Date expiration = new Date(now.getTime() + refreshTokenExpireMillis);
 
         String tokenValue = Jwts.builder()
                 .subject(String.valueOf(userId))
