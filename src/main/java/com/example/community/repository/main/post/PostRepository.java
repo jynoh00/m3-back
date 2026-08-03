@@ -14,6 +14,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
                     select p
                     from Post p
                     join fetch p.user
+                    join fetch p.artistMusic am
+                    join fetch am.music
+                    join fetch am.artist
                     where p.deletedAt is null
                     and p.blindedAt is null
                     order by p.createdAt desc
@@ -31,6 +34,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
                 select p
                 from Post p
                 join fetch p.user
+                join fetch p.artistMusic am
+                join fetch am.music
+                join fetch am.artist
                 where p.id = :postId
                   and p.deletedAt is null
             """)
@@ -41,6 +47,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
                     select p
                     from Post p
                     join fetch p.user
+                    join fetch p.artistMusic am
+                    join fetch am.music
+                    join fetch am.artist
                     where p.reportCount >= 5
                     and p.deletedAt is null
                     and p.blindedAt is null

@@ -14,8 +14,14 @@ public class PostSummaryDTO {
     @JsonProperty("post_title")
     private final String postTitle;
 
-    @JsonProperty("post_image")
-    private final String postImage;
+    @JsonProperty("music_title")
+    private final String musicTitle;
+
+    @JsonProperty("cover_image")
+    private final String coverImage;
+
+    @JsonProperty("artist_name")
+    private final String artistName;
 
     @JsonProperty("created_at")
     private final LocalDateTime createdAt;
@@ -44,7 +50,9 @@ public class PostSummaryDTO {
     public PostSummaryDTO(Post post) {
         this.postId = post.getId();
         this.postTitle = post.getTitle();
-        this.postImage = post.getImage();
+        this.musicTitle = post.getArtistMusic().getMusic().getTitle();
+        this.coverImage = post.getArtistMusic().getMusic().getCoverImage();
+        this.artistName = post.getArtistMusic().getArtist().getName();
         this.createdAt = post.getCreatedAt();
         this.likeCount = post.getLikeCount();
         this.viewCount = post.getViewCount();

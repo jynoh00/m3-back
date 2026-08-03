@@ -4,8 +4,8 @@ import com.example.community.common.ExceptionMessage;
 import com.example.community.common.PageRequestFactory;
 import com.example.community.dto.*;
 import com.example.community.entity.history.post.PostHistory;
+import com.example.community.entity.main.music.ArtistMusic;
 import com.example.community.entity.main.post.Post;
-import com.example.community.entity.main.post.PostContent;
 import com.example.community.entity.main.post.TempPost;
 import com.example.community.entity.main.post.like.PostLike;
 import com.example.community.entity.main.post.like.PostLikeId;
@@ -17,7 +17,6 @@ import com.example.community.entity.main.user.User;
 import com.example.community.entity.main.user.UserStat;
 import com.example.community.exception.*;
 import com.example.community.repository.history.post.PostHistoryRepository;
-import com.example.community.repository.main.post.PostContentRepository;
 import com.example.community.repository.main.post.PostRepository;
 import com.example.community.repository.main.post.TempPostRepository;
 import com.example.community.repository.main.post.like.PostLikeRepository;
@@ -25,6 +24,7 @@ import com.example.community.repository.main.post.report.PostReportRepository;
 import com.example.community.repository.main.post.view.PostViewRepository;
 import com.example.community.repository.main.user.UserRepository;
 import com.example.community.repository.main.user.UserStatRepository;
+import com.example.community.service.support.MusicFinder;
 import com.example.community.service.support.PostFinder;
 import com.example.community.service.support.UserFinder;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +34,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -42,7 +43,6 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final TempPostRepository tempPostRepository;
-    private final PostContentRepository postContentRepository;
     private final PostHistoryRepository postHistoryRepository;
     private final PostLikeRepository postLikeRepository;
     private final PostReportRepository postReportRepository;
@@ -51,6 +51,7 @@ public class PostService {
 
     private final PostFinder postFinder;
     private final UserFinder userFinder;
+    private final MusicFinder musicFinder;
 
     @Transactional
     public PostIdResponseDTO createPostProcess(PostRequestDTO createPostRequestDTO, Long userId) {
@@ -65,10 +66,16 @@ public class PostService {
             throw new InvalidRequestException(ExceptionMessage.POST_CREATE_LIMIT_EXCEEDED.getMessage());
         }
 
+        ArtistMusic artistMusic = musicFinder.resolveArtistMusic(
+                createPostRequestDTO.getMusicTitle(),
+                createPostRequestDTO.getCoverImage(),
+                createPostRequestDTO.getArtistNames()
+        );
+
         TempPost tempPost = new TempPost(
                 createPostRequestDTO.getPostTitle(),
                 createPostRequestDTO.getPostContent(),
-                createPostRequestDTO.getPostImage(),
+                artistMusic,
                 user
         );
 
@@ -76,19 +83,13 @@ public class PostService {
 
         Post post = new Post(
                 createPostRequestDTO.getPostTitle(),
-                createPostRequestDTO.getPostImage(),
+                createPostRequestDTO.getPostContent(),
+                artistMusic,
                 user,
                 savedTempPost
         );
 
         Post savedPost = postRepository.save(post);
-
-        PostContent postContent = new PostContent(
-                savedPost,
-                createPostRequestDTO.getPostContent()
-        );
-
-        postContentRepository.save(postContent);
 
         userStat.recordPostCreation(now);
         tempPost.connectPost(savedPost.getId());
@@ -113,9 +114,6 @@ public class PostService {
             throw new BlindedPostAccessException(ExceptionMessage.CANNOT_ACCESS_BLINDED_POST.getMessage());
         }
 
-        PostContent postContent = postContentRepository.findById(postId)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.POST_CONTENT_NOT_FOUND.getMessage()));
-
         User user = userFinder.getUser(userId);
 
         PostViewId postViewId = new PostViewId(userId, postId);
@@ -139,7 +137,9 @@ public class PostService {
         PostLikeId postLikeId = new PostLikeId(userId, postId);
         boolean isLiked = postLikeRepository.existsById(postLikeId);
 
-        return new PostDetailResponseDTO(post, postContent, isLiked);
+        List<ArtistMusic> artistMusicsOfMusic = musicFinder.getArtistMusicsOf(post.getArtistMusic().getMusic());
+
+        return new PostDetailResponseDTO(post, artistMusicsOfMusic, isLiked);
     }
 
     @Transactional
@@ -150,24 +150,26 @@ public class PostService {
             throw new AuthorizationException(ExceptionMessage.POST_UPDATE_FORBIDDEN.getMessage());
         }
 
-        PostContent postContent = postContentRepository.findById(postId)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.POST_CONTENT_NOT_FOUND.getMessage()));
-
         PostHistory postHistory = new PostHistory(
                 post,
                 post.getTitle(),
-                postContent.getContent(),
-                post.getImage()
+                post.getContent(),
+                post.getArtistMusic()
         );
 
         postHistoryRepository.save(postHistory);
 
-        post.update(
-                postRequestDTO.getPostTitle(),
-                postRequestDTO.getPostImage()
+        ArtistMusic artistMusic = musicFinder.resolveArtistMusic(
+                postRequestDTO.getMusicTitle(),
+                postRequestDTO.getCoverImage(),
+                postRequestDTO.getArtistNames()
         );
 
-        postContent.updateContent(postRequestDTO.getPostContent());
+        post.update(
+                postRequestDTO.getPostTitle(),
+                postRequestDTO.getPostContent(),
+                artistMusic
+        );
     }
 
     @Transactional
@@ -189,12 +191,11 @@ public class PostService {
             throw new AuthorizationException(ExceptionMessage.POST_UPDATE_FORBIDDEN.getMessage());
         }
 
-        PostContent postContent = postContentRepository.findById(postId)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.POST_CONTENT_NOT_FOUND.getMessage()));
+        List<ArtistMusic> artisMusicsOfMusic = musicFinder.getArtistMusicsOf(post.getArtistMusic().getMusic());
 
         TempPost tempPost = tempPostRepository.findByPostId(postId).orElse(null);
 
-        return PostEditFormResponseDTO.of(post, postContent, tempPost);
+        return PostEditFormResponseDTO.of(post, artisMusicsOfMusic, tempPost);
     }
 
     @Transactional
@@ -240,10 +241,16 @@ public class PostService {
     public TempPostIdResponseDTO createTempPostProcess(PostRequestDTO requestDTO, Long userId) {
         User user = userFinder.getUser(userId);
 
+        ArtistMusic artistMusic = musicFinder.resolveArtistMusic(
+                requestDTO.getMusicTitle(),
+                requestDTO.getPostContent(),
+                requestDTO.getArtistNames()
+        );
+
         TempPost tempPost = new TempPost(
                 requestDTO.getPostTitle(),
                 requestDTO.getPostContent(),
-                requestDTO.getPostImage(),
+                artistMusic,
                 user
         );
 
@@ -260,18 +267,24 @@ public class PostService {
             throw new AuthorizationException(ExceptionMessage.POST_UPDATE_FORBIDDEN.getMessage());
         }
 
+        ArtistMusic artistMusic = musicFinder.resolveArtistMusic(
+                requestDTO.getMusicTitle(),
+                requestDTO.getCoverImage(),
+                requestDTO.getArtistNames()
+        );
+
         TempPost tempPost = tempPostRepository.findByPostId(postId)
                 .orElseGet(() -> new TempPost(
                         requestDTO.getPostTitle(),
                         requestDTO.getPostContent(),
-                        requestDTO.getPostImage(),
+                        artistMusic,
                         post.getUser()
                 ));
 
         tempPost.update(
                 requestDTO.getPostTitle(),
                 requestDTO.getPostContent(),
-                requestDTO.getPostImage()
+                artistMusic
         );
 
         tempPost.connectPost(postId);

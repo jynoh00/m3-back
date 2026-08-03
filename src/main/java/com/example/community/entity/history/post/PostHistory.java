@@ -1,5 +1,6 @@
 package com.example.community.entity.history.post;
 
+import com.example.community.entity.main.music.ArtistMusic;
 import com.example.community.entity.main.post.Post;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -14,14 +15,18 @@ public class PostHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 26)
     private String title;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(nullable = false, length = 100)
     private String content;
 
-    @Column(length = 500)
-    private String image;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumns({
+            @JoinColumn(name = "artist_id", referencedColumnName = "artist_id", nullable = false),
+            @JoinColumn(name = "music_id", referencedColumnName = "music_id", nullable = false)
+    })
+    private ArtistMusic artistMusic;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
@@ -33,11 +38,11 @@ public class PostHistory {
     protected PostHistory() {
     }
 
-    public PostHistory(Post post, String title, String content, String image) {
+    public PostHistory(Post post, String title, String content, ArtistMusic artistMusic) {
         this.post = post;
         this.title = title;
         this.content = content;
-        this.image = image;
+        this.artistMusic = artistMusic;
         this.changedAt = LocalDateTime.now();
     }
 }

@@ -21,6 +21,12 @@ public final class ValidationMessage {
     public static final String POST_TITLE_REQUIRED = "post_title_required";
     public static final String INVALID_POST_TITLE_LENGTH = "invalid_post_title_length";
     public static final String POST_CONTENT_REQUIRED = "post_content_required";
+    public static final String INVALID_POST_CONTENT_LENGTH = "invalid_post_content_length";
+
+    public static final String MUSIC_TITLE_REQUIRED = "music_title_required";
+    public static final String COVER_IMAGE_REQUIRED = "cover_image_required";
+    public static final String ARTIST_NAMES_REQUIRED = "artist_names_required";
+    public static final String ARTIST_NAME_BLANK = "artist_name_blank";
 
     public static final String COMMENT_CONTENT_REQUIRED = "comment_content_required";
 

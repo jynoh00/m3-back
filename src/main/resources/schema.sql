@@ -12,6 +12,36 @@ CREATE TABLE users (
     CONSTRAINT uk_users_nickname UNIQUE (nickname)
 );
 
+CREATE TABLE artists (
+    id BIGINT AUTO_INCREMENT NOT NULL,
+    name VARCHAR(100) NOT NULL,
+
+    CONSTRAINT pk_artists PRIMARY KEY (id)
+);
+
+CREATE TABLE musics (
+    id BIGINT AUTO_INCREMENT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    cover_image VARCHAR(500) NOT NULL,
+
+    CONSTRAINT pk_musics PRIMARY KEY (id)
+);
+
+CREATE TABLE artist_music (
+    artist_id BIGINT NOT NULL,
+    music_id BIGINT NOT NULL,
+
+    CONSTRAINT pk_artist_music PRIMARY KEY (artist_id, music_id),
+
+    CONSTRAINT fk_artist_music_artists
+    FOREIGN KEY (artist_id)
+    REFERENCES artists (id),
+
+    CONSTRAINT fk_artist_music_musics
+    FOREIGN KEY (music_id)
+    REFERENCES musics (id)
+);
+
 CREATE TABLE user_post_stats (
     id BIGINT NOT NULL,
     created_at TIMESTAMP,
@@ -28,7 +58,8 @@ CREATE TABLE temp_posts (
     id BIGINT AUTO_INCREMENT NOT NULL,
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
-    image VARCHAR(500),
+    artist_id BIGINT,
+    music_id BIGINT,
     user_id BIGINT NOT NULL,
     post_id BIGINT,
 
@@ -36,13 +67,19 @@ CREATE TABLE temp_posts (
 
     CONSTRAINT fk_temp_posts_users
     FOREIGN KEY (user_id)
-    REFERENCES users (id)
+    REFERENCES users (id),
+
+    CONSTRAINT fk_temp_posts_artist_music
+    FOREIGN KEY (artist_id, music_id)
+    REFERENCES artist_music (artist_id, music_id)
 );
 
 CREATE TABLE posts (
     id BIGINT AUTO_INCREMENT NOT NULL,
-    title VARCHAR(255) NOT NULL,
-    image VARCHAR(500),
+    title VARCHAR(26) NOT NULL,
+    content VARCHAR(100) NOT NULL,
+    artist_id BIGINT NOT NULL,
+    music_id BIGINT NOT NULL,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP,
     like_count BIGINT NOT NULL DEFAULT 0,
@@ -63,6 +100,10 @@ CREATE TABLE posts (
     CONSTRAINT fk_posts_temp_posts
     FOREIGN KEY (temp_id)
     REFERENCES temp_posts (id),
+
+    CONSTRAINT fk_posts_artist_music
+    FOREIGN KEY (artist_id, music_id)
+    REFERENCES artist_music (artist_id, music_id),
 
     CONSTRAINT uk_posts_temp_id UNIQUE (temp_id)
 );
@@ -181,9 +222,10 @@ CREATE TABLE user_histories (
 
 CREATE TABLE post_histories (
     id BIGINT AUTO_INCREMENT NOT NULL,
-    title VARCHAR(255) NOT NULL,
-    content TEXT NOT NULL,
-    image VARCHAR(500),
+    title VARCHAR(26) NOT NULL,
+    content VARCHAR(100) NOT NULL,
+    artist_id BIGINT NOT NULL,
+    music_id BIGINT NOT NULL,
     post_id BIGINT NOT NULL,
     changed_at TIMESTAMP NOT NULL,
 
@@ -191,7 +233,11 @@ CREATE TABLE post_histories (
 
     CONSTRAINT fk_post_histories_posts
     FOREIGN KEY (post_id)
-    REFERENCES posts (id)
+    REFERENCES posts (id),
+
+    CONSTRAINT fk_post_histories_artist_music
+    FOREIGN KEY (artist_id, music_id)
+    REFERENCES artist_music (artist_id, music_id)
 );
 
 CREATE TABLE comment_histories (

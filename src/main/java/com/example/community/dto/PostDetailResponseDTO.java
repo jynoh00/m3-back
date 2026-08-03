@@ -1,11 +1,12 @@
 package com.example.community.dto;
 
+import com.example.community.entity.main.music.ArtistMusic;
 import com.example.community.entity.main.post.Post;
-import com.example.community.entity.main.post.PostContent;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 public class PostDetailResponseDTO {
@@ -18,8 +19,8 @@ public class PostDetailResponseDTO {
     @JsonProperty("post_content")
     private final String postContent;
 
-    @JsonProperty("post_image")
-    private final String postImage;
+    @JsonProperty("music")
+    private final MusicSearchResultDTO music;
 
     @JsonProperty("created_at")
     private final LocalDateTime createdAt;
@@ -54,11 +55,11 @@ public class PostDetailResponseDTO {
     @JsonProperty("user_image")
     private final String userImage;
 
-    public PostDetailResponseDTO(Post post, PostContent postContent, boolean isLiked) {
+    public PostDetailResponseDTO(Post post, List<ArtistMusic> artistMusicsOfMusic, boolean isLiked) {
         this.postId = post.getId();
         this.postTitle = post.getTitle();
-        this.postContent = postContent.getContent();
-        this.postImage = post.getImage();
+        this.postContent = post.getContent();
+        this.music = new MusicSearchResultDTO(post.getArtistMusic().getMusic(), artistMusicsOfMusic);
         this.createdAt = post.getCreatedAt();
         this.updatedAt = post.getUpdatedAt();
         this.likeCount = post.getLikeCount();

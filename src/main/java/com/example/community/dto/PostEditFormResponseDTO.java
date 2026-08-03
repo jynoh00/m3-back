@@ -1,11 +1,13 @@
 package com.example.community.dto;
 
 import com.example.community.common.PostGuideMessage;
+import com.example.community.entity.main.music.ArtistMusic;
 import com.example.community.entity.main.post.Post;
-import com.example.community.entity.main.post.PostContent;
 import com.example.community.entity.main.post.TempPost;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
+
+import java.util.List;
 
 @Getter
 public class PostEditFormResponseDTO {
@@ -15,8 +17,8 @@ public class PostEditFormResponseDTO {
     @JsonProperty("post_content")
     private final String postContent;
 
-    @JsonProperty("post_image")
-    private final String postImage;
+    @JsonProperty("music")
+    private final MusicSearchResultDTO music;
 
     @JsonProperty("has_temp_post")
     private final boolean hasTempPost;
@@ -28,24 +30,26 @@ public class PostEditFormResponseDTO {
     private final String tempMessage;
 
     private PostEditFormResponseDTO(
-            String postTitle, String postContent, String postImage,
+            String postTitle, String postContent, MusicSearchResultDTO music,
             boolean hasTempPost, Long tempPostId, String tempMessage) {
         this.postTitle = postTitle;
         this.postContent = postContent;
-        this.postImage = postImage;
+        this.music = music;
         this.hasTempPost = hasTempPost;
         this.tempPostId = tempPostId;
         this.tempMessage = tempMessage;
     }
 
-    public static PostEditFormResponseDTO of(Post post, PostContent postContent, TempPost tempPost) {
+    public static PostEditFormResponseDTO of(Post post, List<ArtistMusic> artistMusicsOfMusic, TempPost tempPost) {
+        MusicSearchResultDTO music = new MusicSearchResultDTO(post.getArtistMusic().getMusic(), artistMusicsOfMusic);
+
         if (tempPost == null) {
             return new PostEditFormResponseDTO(
-                    post.getTitle(), postContent.getContent(), post.getImage(), false, null, null);
+                    post.getTitle(), post.getContent(), music, false, null, null);
         }
 
         return new PostEditFormResponseDTO(
-                post.getTitle(), postContent.getContent(), post.getImage(),
+                post.getTitle(), post.getContent(), music,
                 true, tempPost.getId(), PostGuideMessage.EDIT_TEMP_POST_EXISTS.getMessage());
     }
 }

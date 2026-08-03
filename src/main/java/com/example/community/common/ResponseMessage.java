@@ -37,7 +37,8 @@ public enum ResponseMessage {
     REPORTED_POSTS_PAGE_LOAD("reported_posts_page_load"),
     POST_REPORT_DETAILS_PAGE_LOAD("post_report_details_page_load"),
     POST_BLIND_SUCCESS("post_blind_success"),
-    REJECT_REPORTS_SUCCESS("reject_reports_success");
+    REJECT_REPORTS_SUCCESS("reject_reports_success"),
+    MUSIC_SEARCH_SUCCESS("music_search_success");
 
 
     private final String message;

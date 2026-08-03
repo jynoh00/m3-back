@@ -1,5 +1,6 @@
 package com.example.community.entity.main.post;
 
+import com.example.community.entity.main.music.ArtistMusic;
 import com.example.community.entity.main.user.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -14,11 +15,18 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 26)
     private String title;
 
-    @Column(length = 500)
-    private String image;
+    @Column(nullable = false, length = 100)
+    private String content;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumns({
+            @JoinColumn(name = "artist_id", referencedColumnName = "artist_id", nullable = false),
+            @JoinColumn(name = "music_id", referencedColumnName = "music_id", nullable = false)
+    })
+    private ArtistMusic artistMusic;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -55,9 +63,10 @@ public class Post {
     protected Post() {
     }
 
-    public Post(String title, String image, User user, TempPost tempPost) {
+    public Post(String title, String content, ArtistMusic artistMusic, User user, TempPost tempPost) {
         this.title = title;
-        this.image = image;
+        this.content = content;
+        this.artistMusic = artistMusic;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = null;
         this.likeCount = 0L;
@@ -74,9 +83,10 @@ public class Post {
         this.deletedAt = LocalDateTime.now();
     }
 
-    public void update(String title, String image) {
+    public void update(String title, String content, ArtistMusic artistMusic) {
         this.title = title;
-        this.image = image;
+        this.content = content;
+        this.artistMusic = artistMusic;
         this.updatedAt = LocalDateTime.now();
     }
 

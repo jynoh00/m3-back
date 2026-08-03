@@ -1,5 +1,6 @@
 package com.example.community.entity.main.post;
 
+import com.example.community.entity.main.music.ArtistMusic;
 import com.example.community.entity.main.user.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -18,8 +19,12 @@ public class TempPost {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @Column(length = 500)
-    private String image;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumns({
+            @JoinColumn(name = "artist_id", referencedColumnName = "artist_id"),
+            @JoinColumn(name = "music_id", referencedColumnName = "music_id")
+    })
+    private ArtistMusic artistMusic; // 초기 임시 저장 게시글의 경우 null 가능성 있음 => 허용
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -31,18 +36,18 @@ public class TempPost {
     protected TempPost() {
     }
 
-    public TempPost(String title, String content, String image, User user) {
+    public TempPost(String title, String content, ArtistMusic artistMusic, User user) {
         this.title = title;
         this.content = content;
-        this.image = image;
+        this.artistMusic = artistMusic;
         this.user = user;
         this.postId = null;
     }
 
-    public void update(String title, String content, String image) {
+    public void update(String title, String content, ArtistMusic artistMusic) {
         this.title = title;
         this.content = content;
-        this.image = image;
+        this.artistMusic = artistMusic;
     }
 
     public void connectPost(Long postId) {
