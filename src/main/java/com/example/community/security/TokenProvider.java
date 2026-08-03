@@ -2,8 +2,6 @@ package com.example.community.security;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-import java.time.LocalDateTime;
-
 public interface TokenProvider {
     public String createAccessToken(Long userId, String role);
     public RefreshTokenInfo createRefreshToken(Long userId);
