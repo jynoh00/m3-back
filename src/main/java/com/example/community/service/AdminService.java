@@ -10,6 +10,7 @@ import com.example.community.exception.BlindedPostAccessException;
 import com.example.community.exception.NotFoundException;
 import com.example.community.repository.main.post.PostRepository;
 import com.example.community.repository.main.post.report.PostReportRepository;
+import com.example.community.service.support.PostFinder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +25,8 @@ public class AdminService {
     private final PostRepository postRepository;
     private final PostReportRepository postReportRepository;
 
+    private final PostFinder postFinder;
+
     @Transactional(readOnly = true)
     public PostPageResponseDTO getReportedPostsInfo(int page) {
         Pageable pageable = PageRequestFactory.of(page);
@@ -35,7 +38,8 @@ public class AdminService {
 
     @Transactional(readOnly = true)
     public PostReportsResponseDTO getPostReportsInfo(Long postId) {
-        validatePostAccessAvailable(postId);
+        Post post = postFinder.getPostWithUser(postId);
+        validatePostAccessAvailable(post);
 
         List<PostReport> postReports = postReportRepository.findByPostIdWithUser(postId);
 
@@ -44,8 +48,7 @@ public class AdminService {
 
     @Transactional
     public void tryBlindPostProcess(Long postId) {
-        Post post = postRepository.findByIdWithUser(postId)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage()));
+        Post post = postFinder.getPostWithUser(postId);
 
         validatePostAccessAvailable(post);
         List<PostReport> postReports = postReportRepository.findByPostId(postId);
@@ -56,31 +59,13 @@ public class AdminService {
 
     @Transactional
     public void tryRejectReportsInPostProcess(Long postId) {
-        Post post = postRepository.findByIdWithUser(postId)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage()));
-
-        if (post.getDeletedAt() != null) {
-            throw new NotFoundException(ExceptionMessage.POST_DELETED.getMessage());
-        }
+        Post post = postFinder.getPostWithUser(postId);
 
         validatePostAccessAvailable(post);
         List<PostReport> postReports = postReportRepository.findByPostId(postId);
         postReports.forEach(PostReport::reject);
 
         post.unBlind();
-    }
-
-    private void validatePostAccessAvailable(Long postId) {
-        Post post = postRepository.findByIdWithUser(postId)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage()));
-
-        if (post.getDeletedAt() != null) {
-            throw new NotFoundException(ExceptionMessage.POST_DELETED.getMessage());
-        }
-
-        if (post.getBlindedAt() != null) {
-            throw new BlindedPostAccessException(ExceptionMessage.ALREADY_BLINDED_POST.getMessage());
-        }
     }
 
     private void validatePostAccessAvailable(Post post) {
