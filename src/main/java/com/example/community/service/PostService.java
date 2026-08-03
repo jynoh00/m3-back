@@ -24,6 +24,8 @@ import com.example.community.repository.main.post.report.PostReportRepository;
 import com.example.community.repository.main.post.view.PostViewRepository;
 import com.example.community.repository.main.user.UserRepository;
 import com.example.community.repository.main.user.UserStatRepository;
+import com.example.community.service.support.PostFinder;
+import com.example.community.service.support.UserFinder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,9 +34,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -50,10 +49,12 @@ public class PostService {
     private final PostViewRepository postViewRepository;
     private final UserStatRepository userStatRepository;
 
+    private final PostFinder postFinder;
+    private final UserFinder userFinder;
+
     @Transactional
     public PostIdResponseDTO createPostProcess(PostRequestDTO createPostRequestDTO, Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.USER_NOT_FOUND.getMessage()));
+        User user = userFinder.getUser(userId);
 
         UserStat userStat = userStatRepository.findById(userId)
                 .orElseGet(() -> userStatRepository.save(new UserStat(user)));
@@ -111,12 +112,7 @@ public class PostService {
 
     @Transactional
     public PostDetailResponseDTO getPostProcess(Long postId, Long userId) {
-        Post post = postRepository.findByIdWithUser(postId)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage()));
-
-        if (post.getDeletedAt() != null) {
-            throw new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage());
-        }
+        Post post = postFinder.getActivePostWithUser(postId);
 
         if (post.getBlindedAt() != null) {
             throw new BlindedPostAccessException(ExceptionMessage.CANNOT_ACCESS_BLINDED_POST.getMessage());
@@ -125,8 +121,7 @@ public class PostService {
         PostContent postContent = postContentRepository.findById(postId)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.POST_CONTENT_NOT_FOUND.getMessage()));
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.USER_NOT_FOUND.getMessage()));
+        User user = userFinder.getUser(userId);
 
         PostViewId postViewId = new PostViewId(userId, postId);
 
@@ -154,12 +149,7 @@ public class PostService {
 
     @Transactional
     public void updatePostProcess(Long postId, PostRequestDTO postRequestDTO, Long userId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage()));
-
-        if (post.getDeletedAt() != null) {
-            throw new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage());
-        }
+        Post post = postFinder.getActivePost(postId);
 
         if (!post.getUser().getId().equals(userId)) {
             throw new AuthorizationException(ExceptionMessage.POST_UPDATE_FORBIDDEN.getMessage());
@@ -187,12 +177,7 @@ public class PostService {
 
     @Transactional
     public void deletePostProcess(Long postId, Long userId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage()));
-
-        if (post.getDeletedAt() != null) {
-            throw new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage());
-        }
+        Post post = postFinder.getActivePost(postId);
 
         if (!post.getUser().getId().equals(userId)) {
             throw new AuthorizationException(ExceptionMessage.POST_DELETE_FORBIDDEN.getMessage());
@@ -203,12 +188,7 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public PostEditFormResponseDTO getPostInfo(Long postId, Long userId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage()));
-
-        if (post.getDeletedAt() != null) {
-            throw new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage());
-        }
+        Post post = postFinder.getActivePost(postId);
 
         if (!post.getUser().getId().equals(userId)) {
             throw new AuthorizationException(ExceptionMessage.POST_UPDATE_FORBIDDEN.getMessage());
@@ -224,15 +204,8 @@ public class PostService {
 
     @Transactional
     public LikeResponseDTO toggleLikeProcess(Long postId, Long userId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage()));
-
-        if (post.getDeletedAt() != null) {
-            throw new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage());
-        }
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.USER_NOT_FOUND.getMessage()));
+        Post post = postFinder.getActivePost(postId);
+        User user = userFinder.getUser(userId);
 
         PostLikeId postLikeId = new PostLikeId(userId, postId);
 
@@ -253,15 +226,8 @@ public class PostService {
 
     @Transactional
     public void reportPost(Long postId, Long userId, String reason) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage()));
-
-        if (post.getDeletedAt() != null) {
-            throw new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage());
-        }
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.USER_NOT_FOUND.getMessage()));
+        Post post = postFinder.getActivePost(postId);
+        User user = userFinder.getUser(userId);
 
         PostReportId postReportId = new PostReportId(postId, userId);
 
@@ -277,8 +243,7 @@ public class PostService {
 
     @Transactional
     public TempPostIdResponseDTO createTempPostProcess(PostRequestDTO requestDTO, Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.USER_NOT_FOUND.getMessage()));
+        User user = userFinder.getUser(userId);
 
         TempPost tempPost = new TempPost(
                 requestDTO.getPostTitle(),
@@ -294,12 +259,7 @@ public class PostService {
 
     @Transactional
     public TempPostIdResponseDTO createPostEditTempProcess(Long postId, PostRequestDTO requestDTO, Long userId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage()));
-
-        if (post.getDeletedAt() != null) {
-            throw new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage());
-        }
+        Post post = postFinder.getActivePost(postId);
 
         if (!post.getUser().getId().equals(userId)) {
             throw new AuthorizationException(ExceptionMessage.POST_UPDATE_FORBIDDEN.getMessage());

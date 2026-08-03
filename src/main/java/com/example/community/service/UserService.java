@@ -11,12 +11,11 @@ import com.example.community.repository.history.user.UserHistoryRepository;
 import com.example.community.repository.main.auth.RefreshTokenRepository;
 import com.example.community.repository.main.user.UserRepository;
 import com.example.community.security.PasswordEncoder;
+import com.example.community.service.support.UserFinder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -26,6 +25,8 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserHistoryRepository userHistoryRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+
+    private final UserFinder userFinder;
 
     @Transactional
     public UserIdResponseDTO joinProcess(JoinRequestDTO joinRequestDTO) {
@@ -55,16 +56,14 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public UserInfoResponseDTO getUserInfo(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.USER_NOT_FOUND.getMessage()));
+        User user = userFinder.getUser(userId);
 
         return new UserInfoResponseDTO(user);
     }
 
     @Transactional
     public UserProfileUpdateResponseDTO updateProfileProcess(String userNewNickname, String userNewImage, Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.USER_NOT_FOUND.getMessage()));
+        User user = userFinder.getUser(userId);
 
         validateUserProfileChange(user, userNewNickname, userNewImage);
 
@@ -88,16 +87,14 @@ public class UserService {
 
         passwordCheck(userNewPassword, userNewPasswordCheck);
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.USER_NOT_FOUND.getMessage()));
+        User user = userFinder.getUser(userId);
 
         user.updatePassword(passwordEncoding(userNewPassword));
     }
 
     @Transactional
     public void withdrawProcess(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.USER_NOT_FOUND.getMessage()));
+        User user = userFinder.getUser(userId);
 
         if (user.getDeletedAt() != null) {
             throw new NotFoundException(ExceptionMessage.USER_NOT_FOUND.getMessage());

@@ -15,13 +15,13 @@ import com.example.community.repository.history.comment.CommentHistoryRepository
 import com.example.community.repository.main.comment.CommentRepository;
 import com.example.community.repository.main.post.PostRepository;
 import com.example.community.repository.main.user.UserRepository;
+import com.example.community.service.support.PostFinder;
+import com.example.community.service.support.UserFinder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -31,17 +31,13 @@ public class CommentService {
     private final UserRepository userRepository;
     private final CommentHistoryRepository commentHistoryRepository;
 
+    private final PostFinder postFinder;
+    private final UserFinder userFinder;
+
     @Transactional
     public CommentIdResponseDTO createCommentProcess(Long postId, CommentRequestDTO commentRequestDTO, Long userId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage()));
-
-        if (post.getDeletedAt() != null) {
-            throw new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage());
-        }
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.USER_NOT_FOUND.getMessage()));
+        Post post = postFinder.getActivePost(postId);
+        User user = userFinder.getUser(userId);
 
         Comment parentComment = commentRequestDTO.getParentCommentId() == null
                 ? null
@@ -63,9 +59,7 @@ public class CommentService {
 
     @Transactional
     public void editCommentProcess(Long postId, Long commentId, CommentRequestDTO commentRequestDTO, Long userId) {
-        if (!postRepository.existsById(postId)) {
-            throw new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage());
-        }
+        postFinder.ensureExists(postId);
 
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.COMMENT_NOT_FOUND.getMessage()));
@@ -97,9 +91,7 @@ public class CommentService {
 
     @Transactional
     public void deleteCommentProcess(Long postId, Long commentId, Long userId) {
-        if (!postRepository.existsById(postId)) {
-            throw new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage());
-        }
+        postFinder.ensureExists(postId);
 
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.COMMENT_NOT_FOUND.getMessage()));
@@ -126,16 +118,8 @@ public class CommentService {
 
     @Transactional(readOnly = true)
     public CommentsResponseDTO getCommentsProcess(Long postId, Long userId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage()));
-
-        if (post.getDeletedAt() != null) {
-            throw new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage());
-        }
-
-
-        userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.USER_NOT_FOUND.getMessage()));
+        postFinder.getActivePost(postId);
+        userFinder.getUser(userId);
 
         List<Comment> comments = commentRepository.findAllByPostIdAndDeletedAtIsNullOrderByCreatedAtAsc(postId);
 

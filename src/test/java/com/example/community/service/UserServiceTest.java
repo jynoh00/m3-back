@@ -11,6 +11,7 @@ import com.example.community.repository.history.user.UserHistoryRepository;
 import com.example.community.repository.main.auth.RefreshTokenRepository;
 import com.example.community.repository.main.user.UserRepository;
 import com.example.community.security.PasswordEncoder;
+import com.example.community.service.support.UserFinder;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeAll;
@@ -64,6 +65,9 @@ class UserServiceTest {
 
     @Mock
     PasswordEncoder passwordEncoder;
+
+    @Mock
+    UserFinder userFinder;
 
     @InjectMocks
     UserService userService;
@@ -214,7 +218,7 @@ class UserServiceTest {
     void 회원정보_수정_페이지에서는_현재_사용자의_이메일_닉네임_이미지를_조회할_수_있다() {
         User user = NORMAL.toUser();
 
-        when(userRepository.findById(NORMAL.id)).thenReturn(Optional.of(user));
+        when(userFinder.getUser(NORMAL.id)).thenReturn(user);
 
         UserInfoResponseDTO result = userService.getUserInfo(NORMAL.id);
 
@@ -227,7 +231,7 @@ class UserServiceTest {
     void 회원정보_수정_시_닉네임과_이미지를_변경할_수_있다() {
         User user = BEFORE_UPDATE.toUser();
 
-        when(userRepository.findById(BEFORE_UPDATE.id)).thenReturn(Optional.of(user));
+        when(userFinder.getUser(BEFORE_UPDATE.id)).thenReturn(user);
         when(userRepository.existsByNickname(AFTER_UPDATE.nickname)).thenReturn(false);
 
         UserProfileUpdateResponseDTO result = userService.updateProfileProcess(
@@ -255,7 +259,7 @@ class UserServiceTest {
     void 회원정보_수정_시_변경하려는_닉네임이_이미_사용_중이면_실패한다() {
         User user = BEFORE_UPDATE.toUser();
 
-        when(userRepository.findById(BEFORE_UPDATE.id)).thenReturn(Optional.of(user));
+        when(userFinder.getUser(BEFORE_UPDATE.id)).thenReturn(user);
         when(userRepository.existsByNickname(USED_NICKNAME.nickname)).thenReturn(true);
 
         assertThatThrownBy(() -> userService.updateProfileProcess(
@@ -273,7 +277,7 @@ class UserServiceTest {
     void 회원정보_수정_성공_시_이전_닉네임과_이전_이미지는_이력으로_보존된다() {
         User user = BEFORE_UPDATE.toUser();
 
-        when(userRepository.findById(BEFORE_UPDATE.id)).thenReturn(Optional.of(user));
+        when(userFinder.getUser(BEFORE_UPDATE.id)).thenReturn(user);
         when(userRepository.existsByNickname(AFTER_UPDATE.nickname)).thenReturn(false);
 
         userService.updateProfileProcess(
@@ -304,7 +308,7 @@ class UserServiceTest {
         User user = NORMAL.toUser();
         UpdatePasswordDTO request = AFTER_UPDATE.updatePasswordRequest();
 
-        when(userRepository.findById(NORMAL.id)).thenReturn(Optional.of(user));
+        when(userFinder.getUser(NORMAL.id)).thenReturn(user);
         when(passwordEncoder.encode(AFTER_UPDATE.password)).thenReturn(AFTER_UPDATE.encodedPassword);
 
         userService.updatePasswordProcess(request, NORMAL.id);
@@ -317,7 +321,7 @@ class UserServiceTest {
     void 회원_탈퇴_성공_시_리프레시_토큰을_삭제하고_사용자를_탈퇴_처리한다() {
         User user = NORMAL.toUser();
 
-        when(userRepository.findById(NORMAL.id)).thenReturn(Optional.of(user));
+        when(userFinder.getUser(NORMAL.id)).thenReturn(user);
 
         userService.withdrawProcess(NORMAL.id);
 
@@ -331,7 +335,8 @@ class UserServiceTest {
 
     @Test
     void 회원_탈퇴_시_사용자가_존재하지_않으면_실패한다() {
-        when(userRepository.findById(NORMAL.id)).thenReturn(Optional.empty());
+        when(userFinder.getUser(NORMAL.id))
+                .thenThrow(new NotFoundException(ExceptionMessage.USER_NOT_FOUND.getMessage()));
 
         assertThatThrownBy(() -> userService.withdrawProcess(NORMAL.id))
                 .isInstanceOf(NotFoundException.class)
@@ -345,7 +350,7 @@ class UserServiceTest {
         User user = NORMAL.toUser();
         user.delete();
 
-        when(userRepository.findById(NORMAL.id)).thenReturn(Optional.of(user));
+        when(userFinder.getUser(NORMAL.id)).thenReturn(user);
 
         assertThatThrownBy(() -> userService.withdrawProcess(NORMAL.id))
                 .isInstanceOf(NotFoundException.class)
@@ -392,7 +397,7 @@ class UserServiceTest {
     void 회원정보_수정_시_닉네임과_이미지가_모두_같으면_실패한다() {
         User user = BEFORE_UPDATE.toUser();
 
-        when(userRepository.findById(BEFORE_UPDATE.id)).thenReturn(Optional.of(user));
+        when(userFinder.getUser(BEFORE_UPDATE.id)).thenReturn(user);
 
         assertThatThrownBy(() -> userService.updateProfileProcess(
                 BEFORE_UPDATE.nickname,
@@ -410,7 +415,7 @@ class UserServiceTest {
     void 회원정보_수정_시_이미지만_변경하면_닉네임_중복검사를_하지_않는다() {
         User user = BEFORE_UPDATE.toUser();
 
-        when(userRepository.findById(BEFORE_UPDATE.id)).thenReturn(Optional.of(user));
+        when(userFinder.getUser(BEFORE_UPDATE.id)).thenReturn(user);
 
         UserProfileUpdateResponseDTO result = userService.updateProfileProcess(
                 BEFORE_UPDATE.nickname,
