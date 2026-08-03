@@ -36,7 +36,7 @@ class UserServiceTest {
     private static final String USER_NOT_FOUND_MESSAGE = ExceptionMessage.USER_NOT_FOUND.getMessage();
     private static final String NO_USER_UPDATE_CHANGES_MESSAGE = ExceptionMessage.NO_USER_UPDATE_CHANGES.getMessage();
 
-    private static final String MISMATCH_PASSWORD_MESSAGE = "mismatch_user_password";
+    private static final String MISMATCH_PASSWORD_MESSAGE = ExceptionMessage.MISMATCH_USER_PASSWORD.getMessage();
 
     private static final String FIELD_EMAIL = "userEmail";
     private static final String FIELD_NICKNAME = "userNickname";
