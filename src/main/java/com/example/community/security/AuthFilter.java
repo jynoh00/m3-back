@@ -23,7 +23,6 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -87,11 +86,7 @@ public class AuthFilter extends OncePerRequestFilter {
     }
 
     private String extractToken(String authorization) {
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
-            return null;
-        }
-
-        return authorization.substring(7);
+        return BearerTokenExtractor.extract(authorization).orElse(null);
     }
 
     private void setAuthorizedResponse(HttpServletResponse response) throws IOException {

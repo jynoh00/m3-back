@@ -1,7 +1,6 @@
 package com.example.community.service;
 
 import com.example.community.common.ExceptionMessage;
-import com.example.community.common.UserRole;
 import com.example.community.dto.AccessTokenResponseDTO;
 import com.example.community.dto.LoginRequestDTO;
 import com.example.community.dto.LoginResponseDTO;
@@ -12,17 +11,15 @@ import com.example.community.exception.ExpiredRefreshTokenException;
 import com.example.community.exception.NotFoundException;
 import com.example.community.repository.main.auth.RefreshTokenRepository;
 import com.example.community.repository.main.user.UserRepository;
+import com.example.community.security.BearerTokenExtractor;
 import com.example.community.security.PasswordEncoder;
 import com.example.community.security.RefreshTokenInfo;
 import com.example.community.security.TokenProvider;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -58,11 +55,7 @@ public class AuthService {
 
     @Transactional(noRollbackFor = ExpiredRefreshTokenException.class)
     public AccessTokenResponseDTO refreshAccessToken(String authorization) {
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
-            throw new AuthenticationException(ExceptionMessage.INVALID_REFRESH_TOKEN.getMessage());
-        }
-
-        String refreshTokenValue = authorization.substring(7);
+        String refreshTokenValue = extractRefreshTokenValue(authorization);
 
         if (!tokenProvider.validateRefreshToken(refreshTokenValue)) {
             throw new AuthenticationException(ExceptionMessage.INVALID_REFRESH_TOKEN.getMessage());
@@ -100,15 +93,16 @@ public class AuthService {
 
     @Transactional
     public void logoutProcess(String authorization) {
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
-            throw new AuthenticationException(ExceptionMessage.INVALID_REFRESH_TOKEN.getMessage());
-        }
-
-        String refreshTokenValue = authorization.substring(7);
+        String refreshTokenValue = extractRefreshTokenValue(authorization);
 
         RefreshToken refreshToken = refreshTokenRepository.findByToken(refreshTokenValue)
                 .orElseThrow(() -> new AuthenticationException(ExceptionMessage.INVALID_REFRESH_TOKEN.getMessage()));
 
         refreshTokenRepository.delete(refreshToken);
+    }
+
+    private String extractRefreshTokenValue(String authorization) {
+        return BearerTokenExtractor.extract(authorization)
+                .orElseThrow(() -> new AuthenticationException(ExceptionMessage.INVALID_REFRESH_TOKEN.getMessage()));
     }
 }
