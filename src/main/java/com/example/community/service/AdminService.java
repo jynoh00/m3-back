@@ -1,26 +1,22 @@
 package com.example.community.service;
 
 import com.example.community.common.ExceptionMessage;
+import com.example.community.common.PageRequestFactory;
 import com.example.community.dto.PostPageResponseDTO;
 import com.example.community.dto.PostReportsResponseDTO;
-import com.example.community.dto.PostSummaryDTO;
 import com.example.community.entity.main.post.Post;
 import com.example.community.entity.main.post.report.PostReport;
 import com.example.community.exception.BlindedPostAccessException;
-import com.example.community.exception.InvalidRequestException;
 import com.example.community.exception.NotFoundException;
 import com.example.community.repository.main.post.PostRepository;
 import com.example.community.repository.main.post.report.PostReportRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -30,12 +26,7 @@ public class AdminService {
 
     @Transactional(readOnly = true)
     public PostPageResponseDTO getReportedPostsInfo(int page) {
-        if (page < 1) {
-            throw new InvalidRequestException(ExceptionMessage.INVALID_PAGE.getMessage());
-        }
-
-        int pageSize = 10;
-        Pageable pageable = PageRequest.of(page - 1, pageSize);
+        Pageable pageable = PageRequestFactory.of(page);
 
         Page<Post> postPage = postRepository.findReportedPageWithUser(pageable);
 

@@ -1,6 +1,7 @@
 package com.example.community.service;
 
 import com.example.community.common.ExceptionMessage;
+import com.example.community.common.PageRequestFactory;
 import com.example.community.dto.*;
 import com.example.community.entity.history.post.PostHistory;
 import com.example.community.entity.main.post.Post;
@@ -98,12 +99,7 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public PostPageResponseDTO postsPageLoadProcess(int page) {
-        if (page < 1) {
-            throw new InvalidRequestException(ExceptionMessage.INVALID_PAGE.getMessage());
-        }
-
-        int pageSize = 10;
-        Pageable pageable = PageRequest.of(page - 1, pageSize);
+        Pageable pageable = PageRequestFactory.of(page);
 
         Page<Post> postPage = postRepository.findPageWithUser(pageable);
 
