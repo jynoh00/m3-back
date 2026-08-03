@@ -2,6 +2,7 @@ package com.example.community.service;
 
 import com.example.community.common.ExceptionMessage;
 import com.example.community.common.UserRole;
+import com.example.community.dto.AccessTokenResponseDTO;
 import com.example.community.dto.LoginRequestDTO;
 import com.example.community.dto.LoginResponseDTO;
 import com.example.community.entity.main.auth.RefreshToken;
@@ -56,7 +57,7 @@ public class AuthService {
     }
 
     @Transactional(noRollbackFor = ExpiredRefreshTokenException.class)
-    public String refreshAccessToken(String authorization) {
+    public AccessTokenResponseDTO refreshAccessToken(String authorization) {
         if (authorization == null || !authorization.startsWith("Bearer ")) {
             throw new AuthenticationException(ExceptionMessage.INVALID_REFRESH_TOKEN.getMessage());
         }
@@ -81,7 +82,9 @@ public class AuthService {
             throw new ExpiredRefreshTokenException(ExceptionMessage.EXPIRED_REFRESH_TOKEN.getMessage()); // 해당 예외 발생 시 롤백 안되게 설정
         }
 
-        return tokenProvider.createAccessToken(userId, refreshToken.getUser().getRole());
+        String accessToken = tokenProvider.createAccessToken(userId, refreshToken.getUser().getRole());
+
+        return new AccessTokenResponseDTO(accessToken);
     }
 
     private User authenticateUser(String userEmail, String userPassword) {

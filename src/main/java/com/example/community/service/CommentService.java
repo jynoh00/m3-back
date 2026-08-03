@@ -1,6 +1,7 @@
 package com.example.community.service;
 
 import com.example.community.common.ExceptionMessage;
+import com.example.community.dto.CommentIdResponseDTO;
 import com.example.community.dto.CommentRequestDTO;
 import com.example.community.dto.CommentResponseDTO;
 import com.example.community.dto.CommentsResponseDTO;
@@ -31,7 +32,7 @@ public class CommentService {
     private final CommentHistoryRepository commentHistoryRepository;
 
     @Transactional
-    public Long createCommentProcess(Long postId, CommentRequestDTO commentRequestDTO, Long userId) {
+    public CommentIdResponseDTO createCommentProcess(Long postId, CommentRequestDTO commentRequestDTO, Long userId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage()));
 
@@ -57,7 +58,7 @@ public class CommentService {
         Comment savedComment = commentRepository.save(comment);
         post.increaseCommentCount();
 
-        return savedComment.getId();
+        return new CommentIdResponseDTO(savedComment.getId());
     }
 
     @Transactional

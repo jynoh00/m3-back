@@ -12,8 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
 @RestController
 @RequiredArgsConstructor
 public class UserController { // 사용자 정보 관련 요청 처리
@@ -27,13 +25,10 @@ public class UserController { // 사용자 정보 관련 요청 처리
 
     @PostMapping("/join")
     public ResponseEntity<?> tryJoin(@Valid @RequestBody JoinRequestDTO joinRequestDTO) {
-        Long userId = userService.joinProcess(joinRequestDTO);
+        UserIdResponseDTO userIdResponse = userService.joinProcess(joinRequestDTO);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                ResponseFormat.of(ResponseMessage.JOIN_SUCCESS.getMessage(),
-                        Map.of(
-                                "user_id", userId
-                        ))
+                ResponseFormat.of(ResponseMessage.JOIN_SUCCESS.getMessage(), userIdResponse)
         );
     }
 

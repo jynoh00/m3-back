@@ -13,8 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/posts")
@@ -34,14 +32,10 @@ public class PostController { // 게시글 관련 요청 처리
             @Valid @RequestBody PostRequestDTO postRequestDTO, HttpServletRequest request) {
 
         Long userId = tokenProvider.getUserId(request);
-        Long postId = postService.createPostProcess(postRequestDTO, userId);
+        PostIdResponseDTO postIdResponseDTO = postService.createPostProcess(postRequestDTO, userId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                ResponseFormat.of(ResponseMessage.WRITE_POST_SUCCESS.getMessage(),
-                        Map.of(
-                                "post_id", postId
-                        ))
-        );
+                ResponseFormat.of(ResponseMessage.WRITE_POST_SUCCESS.getMessage(), postIdResponseDTO));
     }
 
     @GetMapping("/new")
@@ -74,9 +68,7 @@ public class PostController { // 게시글 관련 요청 처리
         postService.updatePostProcess(postId, postRequestDTO, userId);
 
         return ResponseEntity.ok(ResponseFormat.of(ResponseMessage.POST_EDIT_PAGE_LOAD.getMessage(),
-                Map.of(
-                        "post_id", postId
-                ))
+                new PostIdResponseDTO(postId))
         );
     }
 
@@ -114,34 +106,29 @@ public class PostController { // 게시글 관련 요청 처리
         postService.reportPost(postId, userId, postReportRequestDTO.getReason());
 
         return ResponseEntity.ok(ResponseFormat.of(ResponseMessage.REPORT_POST_SUCCESS.getMessage(),
-                Map.of(
-                        "report_status", ReportStatus.PENDING.getStatus()
-                )));
+                new ReportStatusResponseDTO(ReportStatus.PENDING.getStatus()))
+        );
     }
 
     @PostMapping("/temp")
     public ResponseEntity<?> createTempPost(@RequestBody PostRequestDTO requestDTO, HttpServletRequest request) {
         Long userId = tokenProvider.getUserId(request);
-        Long tempPostId = postService.createTempPostProcess(requestDTO, userId);
+        TempPostIdResponseDTO tempPostIdResponse = postService.createTempPostProcess(requestDTO, userId);
 
         return ResponseEntity.ok(
                 ResponseFormat.of(
-                        ResponseMessage.TEMP_POST_CREATE_SUCCESS.getMessage(),
-                        Map.of("temp_post_id", tempPostId)
-                )
+                        ResponseMessage.TEMP_POST_CREATE_SUCCESS.getMessage(), tempPostIdResponse)
         );
     }
 
     @PostMapping("/{post_id}/temp")
     public ResponseEntity<?> createPostEditTemp(@PathVariable("post_id") Long postId, @RequestBody PostRequestDTO requestDTO, HttpServletRequest request) {
         Long userId = tokenProvider.getUserId(request);
-        Long tempPostId = postService.createPostEditTempProcess(postId, requestDTO, userId);
+        TempPostIdResponseDTO tempPostIdResponse = postService.createPostEditTempProcess(postId, requestDTO, userId);
 
         return ResponseEntity.ok(
                 ResponseFormat.of(
-                        ResponseMessage.TEMP_POST_CREATE_SUCCESS.getMessage(),
-                        Map.of("temp_post_id", tempPostId)
-                )
+                        ResponseMessage.TEMP_POST_CREATE_SUCCESS.getMessage(), tempPostIdResponse)
         );
     }
 }

@@ -1,10 +1,7 @@
 package com.example.community.service;
 
 import com.example.community.common.ExceptionMessage;
-import com.example.community.dto.JoinRequestDTO;
-import com.example.community.dto.UpdatePasswordDTO;
-import com.example.community.dto.UserInfoResponseDTO;
-import com.example.community.dto.UserProfileUpdateResponseDTO;
+import com.example.community.dto.*;
 import com.example.community.entity.history.user.UserHistory;
 import com.example.community.entity.main.user.User;
 import com.example.community.exception.DuplicateResourceException;
@@ -31,7 +28,7 @@ public class UserService {
     private final RefreshTokenRepository refreshTokenRepository;
 
     @Transactional
-    public Long joinProcess(JoinRequestDTO joinRequestDTO) {
+    public UserIdResponseDTO joinProcess(JoinRequestDTO joinRequestDTO) {
         passwordCheck(
                 joinRequestDTO.getUserPassword(),
                 joinRequestDTO.getUserPasswordCheck()
@@ -51,7 +48,9 @@ public class UserService {
 
         User savedUser = userRepository.save(user);
 
-        return savedUser.getId();
+        Long userId = savedUser.getId();
+
+        return new UserIdResponseDTO(userId);
     }
 
     @Transactional(readOnly = true)

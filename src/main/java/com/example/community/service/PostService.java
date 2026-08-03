@@ -51,7 +51,7 @@ public class PostService {
     private final UserStatRepository userStatRepository;
 
     @Transactional
-    public Long createPostProcess(PostRequestDTO createPostRequestDTO, Long userId) {
+    public PostIdResponseDTO createPostProcess(PostRequestDTO createPostRequestDTO, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.USER_NOT_FOUND.getMessage()));
 
@@ -92,7 +92,7 @@ public class PostService {
         userStat.recordPostCreation(now);
         tempPost.connectPost(savedPost.getId());
 
-        return savedPost.getId();
+        return new PostIdResponseDTO(savedPost.getId());
     }
 
     @Transactional(readOnly = true)
@@ -276,7 +276,7 @@ public class PostService {
     }
 
     @Transactional
-    public Long createTempPostProcess(PostRequestDTO requestDTO, Long userId) {
+    public TempPostIdResponseDTO createTempPostProcess(PostRequestDTO requestDTO, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.USER_NOT_FOUND.getMessage()));
 
@@ -287,11 +287,13 @@ public class PostService {
                 user
         );
 
-        return tempPostRepository.save(tempPost).getId();
+        Long tempPostId = tempPostRepository.save(tempPost).getId();
+
+        return new TempPostIdResponseDTO(tempPostId);
     }
 
     @Transactional
-    public Long createPostEditTempProcess(Long postId, PostRequestDTO requestDTO, Long userId) {
+    public TempPostIdResponseDTO createPostEditTempProcess(Long postId, PostRequestDTO requestDTO, Long userId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.POST_NOT_FOUND.getMessage()));
 
@@ -319,7 +321,9 @@ public class PostService {
 
         tempPost.connectPost(postId);
 
-        return tempPostRepository.save(tempPost).getId();
+        Long tempPostId = tempPostRepository.save(tempPost).getId();
+
+        return new TempPostIdResponseDTO(tempPostId);
     }
 
     @Transactional(readOnly = true)

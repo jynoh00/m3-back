@@ -2,6 +2,7 @@ package com.example.community.controller;
 
 import com.example.community.common.ResponseFormat;
 import com.example.community.common.ResponseMessage;
+import com.example.community.dto.CommentIdResponseDTO;
 import com.example.community.dto.CommentsResponseDTO;
 import com.example.community.security.TokenProvider;
 import com.example.community.service.CommentService;
@@ -12,8 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,12 +27,10 @@ public class CommentController { // 댓글 관련 요청 처리
             @Valid @RequestBody() CommentRequestDTO commentRequestDTO, HttpServletRequest request) {
 
         Long userId = tokenProvider.getUserId(request);
-        Long commentId = commentService.createCommentProcess(postId, commentRequestDTO, userId);
+        CommentIdResponseDTO commentIdResponse = commentService.createCommentProcess(postId, commentRequestDTO, userId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                ResponseFormat.of(ResponseMessage.WRITE_COMMENT_SUCCESS.getMessage(),
-                        Map.of("comment_id", commentId)
-                )
+                ResponseFormat.of(ResponseMessage.WRITE_COMMENT_SUCCESS.getMessage(), commentIdResponse)
         );
     }
 
@@ -45,10 +42,8 @@ public class CommentController { // 댓글 관련 요청 처리
         Long userId = tokenProvider.getUserId(request);
         commentService.editCommentProcess(postId, commentId, commentRequestDTO, userId);
 
-        return ResponseEntity.ok(
-                ResponseFormat.of(ResponseMessage.COMMENT_EDIT_SUCCESS.getMessage(),
-                        Map.of("comment_id", commentId)
-                )
+        return ResponseEntity.ok(ResponseFormat.of(ResponseMessage.COMMENT_EDIT_SUCCESS.getMessage(),
+                new CommentIdResponseDTO(commentId))
         );
     }
 

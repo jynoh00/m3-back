@@ -2,6 +2,7 @@ package com.example.community.controller;
 
 import com.example.community.common.ResponseFormat;
 import com.example.community.common.ResponseMessage;
+import com.example.community.dto.AccessTokenResponseDTO;
 import com.example.community.dto.LoginResponseDTO;
 import com.example.community.service.AuthService;
 import com.example.community.dto.LoginRequestDTO;
@@ -9,8 +10,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -37,12 +36,10 @@ public class AuthController { // 로그인, 로그아웃 관련 요청 처리
 
     @PostMapping("/token")
     public ResponseEntity<?> refreshToken(@RequestHeader("Authorization") String authorization) {
-        String accessToken = authService.refreshAccessToken(authorization);
+        AccessTokenResponseDTO accessTokenResponse = authService.refreshAccessToken(authorization);
 
         return ResponseEntity.ok(
-                ResponseFormat.of(ResponseMessage.ACCESS_TOKEN_REFRESHED.getMessage(),
-                        Map.of("access_token", accessToken)
-                )
+                ResponseFormat.of(ResponseMessage.ACCESS_TOKEN_REFRESHED.getMessage(), accessTokenResponse)
         );
     }
 }
