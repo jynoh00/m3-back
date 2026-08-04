@@ -1,10 +1,10 @@
 package com.example.community.service;
 
 import com.example.community.common.ExceptionMessage;
+import com.example.community.common.PageRequestFactory;
 import com.example.community.dto.CommentIdResponseDTO;
+import com.example.community.dto.CommentPageResponseDTO;
 import com.example.community.dto.CommentRequestDTO;
-import com.example.community.dto.CommentResponseDTO;
-import com.example.community.dto.CommentsResponseDTO;
 import com.example.community.entity.history.comment.CommentHistory;
 import com.example.community.entity.main.comment.Comment;
 import com.example.community.entity.main.post.Post;
@@ -18,10 +18,10 @@ import com.example.community.repository.main.user.UserRepository;
 import com.example.community.service.support.PostFinder;
 import com.example.community.service.support.UserFinder;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -111,16 +111,13 @@ public class CommentService {
     }
 
     @Transactional(readOnly = true)
-    public CommentsResponseDTO getCommentsProcess(Long postId, Long userId) {
+    public CommentPageResponseDTO getCommentsProcess(Long postId, Long userId, int page) {
         postFinder.getActivePost(postId);
         userFinder.getUser(userId);
 
-        List<Comment> comments = commentRepository.findAllByPostIdAndDeletedAtIsNullOrderByCreatedAtAsc(postId);
+        Pageable pageable = PageRequestFactory.of(page);
+        Page<Comment> commentPage = commentRepository.findAllByPostIdAndDeletedAtIsNullOrderByCreatedAtAsc(postId, pageable);
 
-        List<CommentResponseDTO> commentResponses = comments.stream()
-                .map(CommentResponseDTO::new)
-                .toList();
-
-        return new CommentsResponseDTO(commentResponses);
+        return CommentPageResponseDTO.of(commentPage, page);
     }
 }

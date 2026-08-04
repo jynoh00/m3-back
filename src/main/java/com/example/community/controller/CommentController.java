@@ -3,7 +3,7 @@ package com.example.community.controller;
 import com.example.community.common.ResponseFormat;
 import com.example.community.common.ResponseMessage;
 import com.example.community.dto.CommentIdResponseDTO;
-import com.example.community.dto.CommentsResponseDTO;
+import com.example.community.dto.CommentPageResponseDTO;
 import com.example.community.security.TokenProvider;
 import com.example.community.service.CommentService;
 import com.example.community.dto.CommentRequestDTO;
@@ -61,10 +61,11 @@ public class CommentController { // 댓글 관련 요청 처리
     @GetMapping
     public ResponseEntity<?> getComments(
             @PathVariable("post_id") Long postId,
+            @RequestParam(defaultValue = "1") int page,
             HttpServletRequest request) {
 
         Long userId = tokenProvider.getUserId(request);
-        CommentsResponseDTO comments = commentService.getCommentsProcess(postId, userId);
+        CommentPageResponseDTO comments = commentService.getCommentsProcess(postId, userId, page);
 
         return ResponseEntity.ok(
                 ResponseFormat.of(
