@@ -24,6 +24,11 @@ public enum ExceptionMessage {
     MISMATCH_USER_PASSWORD("mismatch_user_password"),
     NO_USER_UPDATE_CHANGES("no_user_update_changes"),
 
+    // 이미지 관련
+    EMPTY_IMAGE_FILE("empty_image_file"),
+    INVALID_IMAGE_FILE("invalid_image_file"),
+    IMAGE_UPLOAD_FAILED("image_upload_failed"),
+
     // 게시글 관련
     POST_NOT_FOUND("post_not_found"),
     POST_DELETED("post_deleted"),

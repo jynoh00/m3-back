@@ -6,6 +6,7 @@ public final class PublicPaths {
     public static final String TOKEN = "/token";
     public static final String LOGOUT = "/logout";
     public static final String H2_CONSOLE = "/h2-console";
+    public static final String IMAGES = "/images";
 
     private PublicPaths() {
     }
