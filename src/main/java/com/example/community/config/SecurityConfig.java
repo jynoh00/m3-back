@@ -39,6 +39,7 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
+                .logout(AbstractHttpConfigurer::disable)
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
@@ -46,6 +47,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, PublicPaths.LOGIN, PublicPaths.JOIN).permitAll()
                         .requestMatchers(HttpMethod.POST, PublicPaths.LOGIN, PublicPaths.JOIN).permitAll()
                         .requestMatchers(HttpMethod.POST, PublicPaths.TOKEN).permitAll()
+                        .requestMatchers(HttpMethod.POST, PublicPaths.LOGOUT).permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
