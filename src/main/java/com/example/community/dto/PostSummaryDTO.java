@@ -14,6 +14,9 @@ public class PostSummaryDTO {
     @JsonProperty("post_title")
     private final String postTitle;
 
+    @JsonProperty("post_content")
+    private final String postContent;
+
     @JsonProperty("music_title")
     private final String musicTitle;
 
@@ -50,6 +53,7 @@ public class PostSummaryDTO {
     public PostSummaryDTO(Post post) {
         this.postId = post.getId();
         this.postTitle = post.getTitle();
+        this.postContent = post.getContent();
         this.musicTitle = post.getArtistMusic().getMusic().getTitle();
         this.coverImage = post.getArtistMusic().getMusic().getCoverImage();
         this.artistName = post.getArtistMusic().getArtist().getName();
