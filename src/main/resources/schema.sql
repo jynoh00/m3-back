@@ -100,17 +100,6 @@ CREATE TABLE posts (
     REFERENCES artist_music (artist_id, music_id)
 );
 
-CREATE TABLE post_contents (
-    id BIGINT NOT NULL,
-    content TEXT NOT NULL,
-
-    CONSTRAINT pk_post_contents PRIMARY KEY (id),
-
-    CONSTRAINT fk_post_contents_posts
-    FOREIGN KEY (id)
-    REFERENCES posts (id)
-);
-
 CREATE TABLE post_views (
     user_id BIGINT NOT NULL,
     post_id BIGINT NOT NULL,
