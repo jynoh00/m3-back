@@ -33,6 +33,7 @@ public enum ExceptionMessage {
     POST_REPORT_ALREADY_EXISTS("post_report_already_exists"),
     ALREADY_BLINDED_POST("already_blinded_post"),
     CANNOT_ACCESS_BLINDED_POST("can't_access_to_blinded_post"),
+    TEMP_POST_NOT_FOUND("temp_post_not_found"),
 
     // 음악 관련
     MUSIC_NOT_SELECTED("music_not_selected"),

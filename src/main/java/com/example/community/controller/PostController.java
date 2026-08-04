@@ -121,6 +121,14 @@ public class PostController { // 게시글 관련 요청 처리
         );
     }
 
+    @GetMapping("/temp")
+    public ResponseEntity<?> getNewPostTempDetail(HttpServletRequest request) {
+        Long userId = tokenProvider.getUserId(request);
+        TempPostDetailResponseDTO tempPostDetail = postService.getNewPostTempDetailProcess(userId);
+
+        return ResponseEntity.ok(ResponseFormat.of(ResponseMessage.TEMP_POST_DETAIL_LOAD.getMessage(), tempPostDetail));
+    }
+
     @PostMapping("/{post_id}/temp")
     public ResponseEntity<?> createPostEditTemp(@PathVariable("post_id") Long postId, @RequestBody PostRequestDTO requestDTO, HttpServletRequest request) {
         Long userId = tokenProvider.getUserId(request);
@@ -130,5 +138,13 @@ public class PostController { // 게시글 관련 요청 처리
                 ResponseFormat.of(
                         ResponseMessage.TEMP_POST_CREATE_SUCCESS.getMessage(), tempPostIdResponse)
         );
+    }
+
+    @GetMapping("/{post_id}/temp")
+    public ResponseEntity<?> getPostEditTempDetail(@PathVariable("post_id") Long postId, HttpServletRequest request) {
+        Long userId = tokenProvider.getUserId(request);
+        TempPostDetailResponseDTO tempPostDetail = postService.getPostEditTempDetailProcess(postId, userId);
+
+        return ResponseEntity.ok(ResponseFormat.of(ResponseMessage.TEMP_POST_DETAIL_LOAD.getMessage(), tempPostDetail));
     }
 }

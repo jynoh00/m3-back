@@ -243,7 +243,7 @@ public class PostService {
 
         ArtistMusic artistMusic = musicFinder.resolveArtistMusic(
                 requestDTO.getMusicTitle(),
-                requestDTO.getPostContent(),
+                requestDTO.getCoverImage(),
                 requestDTO.getArtistNames()
         );
 
@@ -301,5 +301,39 @@ public class PostService {
 
         return tempPost.map(NewPostFormResponseDTO::of)
                 .orElseGet(NewPostFormResponseDTO::noTempPost);
+    }
+
+    @Transactional(readOnly = true)
+    public TempPostDetailResponseDTO getNewPostTempDetailProcess(Long userId) {
+        TempPost tempPost = tempPostRepository.findFirstByUserIdAndPostIdIsNullOrderByIdDesc(userId)
+                .orElseThrow(() -> new NotFoundException(ExceptionMessage.TEMP_POST_NOT_FOUND.getMessage()));
+
+        return toTempPostDetailResponseDTO(tempPost);
+    }
+
+    @Transactional(readOnly = true)
+    public TempPostDetailResponseDTO getPostEditTempDetailProcess(Long postId, Long userId) {
+        Post post = postFinder.getActivePost(postId);
+
+        if (!post.getUser().getId().equals(userId)) {
+            throw new AuthorizationException(ExceptionMessage.POST_UPDATE_FORBIDDEN.getMessage());
+        }
+
+        TempPost tempPost = tempPostRepository.findByPostId(postId)
+                .orElseThrow(() -> new NotFoundException(ExceptionMessage.TEMP_POST_NOT_FOUND.getMessage()));
+
+        return toTempPostDetailResponseDTO(tempPost);
+    }
+
+    private TempPostDetailResponseDTO toTempPostDetailResponseDTO(TempPost tempPost) {
+        MusicSearchResultDTO music = null;
+
+        if (tempPost.getArtistMusic() != null) {
+            List<ArtistMusic> artistMusicsOfMusic = musicFinder.getArtistMusicsOf(tempPost.getArtistMusic().getMusic());
+            music = new MusicSearchResultDTO(tempPost.getArtistMusic().getMusic(), artistMusicsOfMusic);
+        }
+
+        return new TempPostDetailResponseDTO(
+                tempPost.getId(), tempPost.getTitle(), tempPost.getContent(), music);
     }
 }
