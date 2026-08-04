@@ -47,10 +47,6 @@ public class Post {
     @Column(name = "report_count", nullable = false)
     private Integer reportCount;
 
-    @ManyToOne(fetch = FetchType.LAZY) // OneToOne vs ManyToOne => ManyToOne 안정적 LAZY 때문에
-    @JoinColumn(name = "temp_id", nullable = false, unique = true) // unique 추가
-    private TempPost tempPost;
-
     @Column(name = "blinded_at")
     private LocalDateTime blindedAt;
 
@@ -63,7 +59,7 @@ public class Post {
     protected Post() {
     }
 
-    public Post(String title, String content, ArtistMusic artistMusic, User user, TempPost tempPost) {
+    public Post(String title, String content, ArtistMusic artistMusic, User user) {
         this.title = title;
         this.content = content;
         this.artistMusic = artistMusic;
@@ -73,7 +69,6 @@ public class Post {
         this.viewCount = 0L;
         this.user = user;
         this.reportCount = 0;
-        this.tempPost = tempPost;
         this.blindedAt = null;
         this.deletedAt = null;
         this.commentCount = 0L;

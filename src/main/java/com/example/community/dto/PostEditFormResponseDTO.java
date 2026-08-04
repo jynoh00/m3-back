@@ -23,20 +23,16 @@ public class PostEditFormResponseDTO {
     @JsonProperty("has_temp_post")
     private final boolean hasTempPost;
 
-    @JsonProperty("temp_post_id")
-    private final Long tempPostId;
-
     @JsonProperty("temp_message")
     private final String tempMessage;
 
     private PostEditFormResponseDTO(
             String postTitle, String postContent, MusicSearchResultDTO music,
-            boolean hasTempPost, Long tempPostId, String tempMessage) {
+            boolean hasTempPost, String tempMessage) {
         this.postTitle = postTitle;
         this.postContent = postContent;
         this.music = music;
         this.hasTempPost = hasTempPost;
-        this.tempPostId = tempPostId;
         this.tempMessage = tempMessage;
     }
 
@@ -45,11 +41,11 @@ public class PostEditFormResponseDTO {
 
         if (tempPost == null) {
             return new PostEditFormResponseDTO(
-                    post.getTitle(), post.getContent(), music, false, null, null);
+                    post.getTitle(), post.getContent(), music, false, null);
         }
 
         return new PostEditFormResponseDTO(
                 post.getTitle(), post.getContent(), music,
-                true, tempPost.getId(), PostGuideMessage.EDIT_TEMP_POST_EXISTS.getMessage());
+                true, PostGuideMessage.EDIT_TEMP_POST_EXISTS.getMessage());
     }
 }

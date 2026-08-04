@@ -55,15 +55,14 @@ CREATE TABLE user_post_stats (
 );
 
 CREATE TABLE temp_posts (
-    id BIGINT AUTO_INCREMENT NOT NULL,
+    user_id BIGINT NOT NULL,
+    post_id BIGINT NOT NULL DEFAULT 0, -- 0이면 연결된 게시글이 없는 상태 => 신규 게시글 작성의 임시저장
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
     artist_id BIGINT,
     music_id BIGINT,
-    user_id BIGINT NOT NULL,
-    post_id BIGINT,
 
-    CONSTRAINT pk_temp_posts PRIMARY KEY (id),
+    CONSTRAINT pk_temp_posts PRIMARY KEY (user_id, post_id),
 
     CONSTRAINT fk_temp_posts_users
     FOREIGN KEY (user_id)
@@ -86,7 +85,6 @@ CREATE TABLE posts (
     view_count BIGINT NOT NULL DEFAULT 0,
     user_id BIGINT NOT NULL,
     report_count INT NOT NULL DEFAULT 0,
-    temp_id BIGINT NOT NULL,
     blinded_at TIMESTAMP,
     deleted_at TIMESTAMP,
     comment_count BIGINT NOT NULL DEFAULT 0,
@@ -97,15 +95,9 @@ CREATE TABLE posts (
     FOREIGN KEY (user_id)
     REFERENCES users (id),
 
-    CONSTRAINT fk_posts_temp_posts
-    FOREIGN KEY (temp_id)
-    REFERENCES temp_posts (id),
-
     CONSTRAINT fk_posts_artist_music
     FOREIGN KEY (artist_id, music_id)
-    REFERENCES artist_music (artist_id, music_id),
-
-    CONSTRAINT uk_posts_temp_id UNIQUE (temp_id)
+    REFERENCES artist_music (artist_id, music_id)
 );
 
 CREATE TABLE post_contents (

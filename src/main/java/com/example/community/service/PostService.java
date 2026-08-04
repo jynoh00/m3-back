@@ -7,6 +7,7 @@ import com.example.community.entity.history.post.PostHistory;
 import com.example.community.entity.main.music.ArtistMusic;
 import com.example.community.entity.main.post.Post;
 import com.example.community.entity.main.post.TempPost;
+import com.example.community.entity.main.post.TempPostId;
 import com.example.community.entity.main.post.like.PostLike;
 import com.example.community.entity.main.post.like.PostLikeId;
 import com.example.community.entity.main.post.report.PostReport;
@@ -72,27 +73,18 @@ public class PostService {
                 createPostRequestDTO.getArtistNames()
         );
 
-        TempPost tempPost = new TempPost(
+        Post post = new Post(
                 createPostRequestDTO.getPostTitle(),
                 createPostRequestDTO.getPostContent(),
                 artistMusic,
                 user
         );
 
-        TempPost savedTempPost = tempPostRepository.save(tempPost);
-
-        Post post = new Post(
-                createPostRequestDTO.getPostTitle(),
-                createPostRequestDTO.getPostContent(),
-                artistMusic,
-                user,
-                savedTempPost
-        );
-
         Post savedPost = postRepository.save(post);
 
         userStat.recordPostCreation(now);
-        tempPost.connectPost(savedPost.getId());
+
+        tempPostRepository.deleteByUserIdAndPostId(userId, TempPost.NO_POST_ID);
 
         return new PostIdResponseDTO(savedPost.getId());
     }
@@ -193,7 +185,7 @@ public class PostService {
 
         List<ArtistMusic> artisMusicsOfMusic = musicFinder.getArtistMusicsOf(post.getArtistMusic().getMusic());
 
-        TempPost tempPost = tempPostRepository.findByPostId(postId).orElse(null);
+        TempPost tempPost = tempPostRepository.findById(new TempPostId(userId, postId)).orElse(null);
 
         return PostEditFormResponseDTO.of(post, artisMusicsOfMusic, tempPost);
     }
@@ -238,7 +230,7 @@ public class PostService {
     }
 
     @Transactional
-    public TempPostIdResponseDTO createTempPostProcess(PostRequestDTO requestDTO, Long userId) {
+    public void createTempPostProcess(PostRequestDTO requestDTO, Long userId) {
         User user = userFinder.getUser(userId);
 
         ArtistMusic artistMusic = musicFinder.resolveArtistMusic(
@@ -247,20 +239,26 @@ public class PostService {
                 requestDTO.getArtistNames()
         );
 
-        TempPost tempPost = new TempPost(
+        TempPost tempPost = tempPostRepository.findById(new TempPostId(userId, TempPost.NO_POST_ID))
+                .orElseGet(() -> new TempPost(
+                        requestDTO.getPostTitle(),
+                        requestDTO.getPostContent(),
+                        artistMusic,
+                        user,
+                        null
+                ));
+
+        tempPost.update(
                 requestDTO.getPostTitle(),
                 requestDTO.getPostContent(),
-                artistMusic,
-                user
+                artistMusic
         );
 
-        Long tempPostId = tempPostRepository.save(tempPost).getId();
-
-        return new TempPostIdResponseDTO(tempPostId);
+        tempPostRepository.save(tempPost);
     }
 
     @Transactional
-    public TempPostIdResponseDTO createPostEditTempProcess(Long postId, PostRequestDTO requestDTO, Long userId) {
+    public void createPostEditTempProcess(Long postId, PostRequestDTO requestDTO, Long userId) {
         Post post = postFinder.getActivePost(postId);
 
         if (!post.getUser().getId().equals(userId)) {
@@ -273,12 +271,13 @@ public class PostService {
                 requestDTO.getArtistNames()
         );
 
-        TempPost tempPost = tempPostRepository.findByPostId(postId)
+        TempPost tempPost = tempPostRepository.findById(new TempPostId(userId, postId))
                 .orElseGet(() -> new TempPost(
                         requestDTO.getPostTitle(),
                         requestDTO.getPostContent(),
                         artistMusic,
-                        post.getUser()
+                        post.getUser(),
+                        postId
                 ));
 
         tempPost.update(
@@ -287,17 +286,13 @@ public class PostService {
                 artistMusic
         );
 
-        tempPost.connectPost(postId);
-
-        Long tempPostId = tempPostRepository.save(tempPost).getId();
-
-        return new TempPostIdResponseDTO(tempPostId);
+        tempPostRepository.save(tempPost);
     }
 
     @Transactional(readOnly = true)
     public NewPostFormResponseDTO getNewPostFormProcess(Long userId) {
         Optional<TempPost> tempPost =
-                tempPostRepository.findFirstByUserIdAndPostIdIsNullOrderByIdDesc(userId);
+                tempPostRepository.findById(new TempPostId(userId, TempPost.NO_POST_ID));
 
         return tempPost.map(NewPostFormResponseDTO::of)
                 .orElseGet(NewPostFormResponseDTO::noTempPost);
@@ -305,7 +300,7 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public TempPostDetailResponseDTO getNewPostTempDetailProcess(Long userId) {
-        TempPost tempPost = tempPostRepository.findFirstByUserIdAndPostIdIsNullOrderByIdDesc(userId)
+        TempPost tempPost = tempPostRepository.findById(new TempPostId(userId, TempPost.NO_POST_ID))
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.TEMP_POST_NOT_FOUND.getMessage()));
 
         return toTempPostDetailResponseDTO(tempPost);
@@ -319,7 +314,7 @@ public class PostService {
             throw new AuthorizationException(ExceptionMessage.POST_UPDATE_FORBIDDEN.getMessage());
         }
 
-        TempPost tempPost = tempPostRepository.findByPostId(postId)
+        TempPost tempPost = tempPostRepository.findById(new TempPostId(userId, postId))
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.TEMP_POST_NOT_FOUND.getMessage()));
 
         return toTempPostDetailResponseDTO(tempPost);
@@ -333,7 +328,6 @@ public class PostService {
             music = new MusicSearchResultDTO(tempPost.getArtistMusic().getMusic(), artistMusicsOfMusic);
         }
 
-        return new TempPostDetailResponseDTO(
-                tempPost.getId(), tempPost.getTitle(), tempPost.getContent(), music);
+        return new TempPostDetailResponseDTO(tempPost.getTitle(), tempPost.getContent(), music);
     }
 }

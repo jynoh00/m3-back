@@ -5,9 +5,6 @@ import lombok.Getter;
 
 @Getter
 public class TempPostDetailResponseDTO {
-    @JsonProperty("temp_post_id")
-    private final Long tempPostId;
-
     @JsonProperty("post_title")
     private final String postTitle;
 
@@ -17,8 +14,7 @@ public class TempPostDetailResponseDTO {
     @JsonProperty("music")
     private final MusicSearchResultDTO music;
 
-    public TempPostDetailResponseDTO(Long tempPostId, String postTitle, String postContent, MusicSearchResultDTO music) {
-        this.tempPostId = tempPostId;
+    public TempPostDetailResponseDTO(String postTitle, String postContent, MusicSearchResultDTO music) {
         this.postTitle = postTitle;
         this.postContent = postContent;
         this.music = music;
