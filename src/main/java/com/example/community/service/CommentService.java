@@ -39,15 +39,9 @@ public class CommentService {
         Post post = postFinder.getActivePost(postId);
         User user = userFinder.getUser(userId);
 
-        Comment parentComment = commentRequestDTO.getParentCommentId() == null
-                ? null
-                : commentRepository.findById(commentRequestDTO.getParentCommentId())
-                  .orElseThrow(() -> new NotFoundException(ExceptionMessage.COMMENT_NOT_FOUND.getMessage()));
-
         Comment comment = new Comment(
                 post,
                 user,
-                parentComment,
                 commentRequestDTO.getCommentContent()
         );
 

@@ -155,7 +155,6 @@ CREATE TABLE comments (
     updated_at TIMESTAMP,
     post_id BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
-    parent_comment_id BIGINT,
     content VARCHAR(1000) NOT NULL,
     deleted_at TIMESTAMP,
 
@@ -167,11 +166,7 @@ CREATE TABLE comments (
 
     CONSTRAINT fk_comments_users
     FOREIGN KEY (user_id)
-    REFERENCES users (id),
-
-    CONSTRAINT fk_comments_parent_comment
-    FOREIGN KEY (parent_comment_id)
-    REFERENCES comments (id)
+    REFERENCES users (id)
 );
 
 CREATE TABLE refresh_tokens (

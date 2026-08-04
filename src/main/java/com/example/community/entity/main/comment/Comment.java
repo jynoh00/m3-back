@@ -30,10 +30,6 @@ public class Comment {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_comment_id")
-    private Comment parentComment;
-
     @Column(nullable = false, length = 1000)
     private String content;
 
@@ -44,12 +40,11 @@ public class Comment {
 
     }
 
-    public Comment(Post post, User user, Comment parentComment, String content) {
+    public Comment(Post post, User user, String content) {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = null;
         this.post = post;
         this.user = user;
-        this.parentComment = parentComment;
         this.content = content;
         this.deletedAt = null;
     }
