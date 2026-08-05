@@ -2,9 +2,9 @@ package com.example.community.service;
 
 import com.example.community.common.ExceptionMessage;
 import com.example.community.common.PageRequestFactory;
-import com.example.community.dto.CommentIdResponseDTO;
-import com.example.community.dto.CommentPageResponseDTO;
-import com.example.community.dto.CommentRequestDTO;
+import com.example.community.dto.comment.CommentIdResponseDTO;
+import com.example.community.dto.comment.CommentPageResponseDTO;
+import com.example.community.dto.comment.CommentRequestDTO;
 import com.example.community.entity.history.comment.CommentHistory;
 import com.example.community.entity.main.comment.Comment;
 import com.example.community.entity.main.post.Post;

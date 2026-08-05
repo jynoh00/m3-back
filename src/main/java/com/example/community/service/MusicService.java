@@ -1,7 +1,7 @@
 package com.example.community.service;
 
-import com.example.community.dto.MusicSearchResponseDTO;
-import com.example.community.dto.MusicSearchResultDTO;
+import com.example.community.dto.music.MusicSearchResponseDTO;
+import com.example.community.dto.music.MusicSearchResultDTO;
 import com.example.community.entity.main.music.Music;
 import com.example.community.repository.main.music.MusicRepository;
 import com.example.community.service.support.MusicFinder;

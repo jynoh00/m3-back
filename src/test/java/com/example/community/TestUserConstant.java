@@ -1,7 +1,7 @@
 package com.example.community;
 
-import com.example.community.dto.JoinRequestDTO;
-import com.example.community.dto.UpdatePasswordDTO;
+import com.example.community.dto.user.JoinRequestDTO;
+import com.example.community.dto.user.UpdatePasswordDTO;
 import com.example.community.entity.main.user.User;
 import org.springframework.test.util.ReflectionTestUtils;
 

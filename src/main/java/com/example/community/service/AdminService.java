@@ -2,8 +2,8 @@ package com.example.community.service;
 
 import com.example.community.common.ExceptionMessage;
 import com.example.community.common.PageRequestFactory;
-import com.example.community.dto.PostPageResponseDTO;
-import com.example.community.dto.PostReportsResponseDTO;
+import com.example.community.dto.post.PostPageResponseDTO;
+import com.example.community.dto.post.report.PostReportsResponseDTO;
 import com.example.community.entity.main.post.Post;
 import com.example.community.entity.main.post.report.PostReport;
 import com.example.community.exception.BlindedPostAccessException;

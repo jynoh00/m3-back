@@ -2,7 +2,7 @@ package com.example.community.controller;
 
 import com.example.community.common.ResponseFormat;
 import com.example.community.common.ResponseMessage;
-import com.example.community.dto.ImageUploadResponseDTO;
+import com.example.community.dto.image.ImageUploadResponseDTO;
 import com.example.community.service.ImageStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

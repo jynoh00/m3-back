@@ -3,7 +3,7 @@ package com.example.community.controller;
 import com.example.community.common.ExceptionMessage;
 import com.example.community.common.ResponseFormat;
 import com.example.community.common.ResponseMessage;
-import com.example.community.dto.MusicSearchResponseDTO;
+import com.example.community.dto.music.MusicSearchResponseDTO;
 import com.example.community.exception.InvalidRequestException;
 import com.example.community.service.MusicService;
 import lombok.RequiredArgsConstructor;

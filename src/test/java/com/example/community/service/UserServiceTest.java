@@ -1,7 +1,7 @@
 package com.example.community.service;
 
 import com.example.community.common.ExceptionMessage;
-import com.example.community.dto.*;
+import com.example.community.dto.user.*;
 import com.example.community.entity.history.user.UserHistory;
 import com.example.community.entity.main.user.User;
 import com.example.community.exception.DuplicateResourceException;

@@ -2,8 +2,8 @@ package com.example.community.controller;
 
 import com.example.community.common.ResponseFormat;
 import com.example.community.common.ResponseMessage;
-import com.example.community.dto.PostPageResponseDTO;
-import com.example.community.dto.PostReportsResponseDTO;
+import com.example.community.dto.post.PostPageResponseDTO;
+import com.example.community.dto.post.report.PostReportsResponseDTO;
 import com.example.community.service.AdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

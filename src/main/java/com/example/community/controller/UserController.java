@@ -2,7 +2,7 @@ package com.example.community.controller;
 
 import com.example.community.common.ResponseFormat;
 import com.example.community.common.ResponseMessage;
-import com.example.community.dto.*;
+import com.example.community.dto.user.*;
 import com.example.community.security.TokenProvider;
 import com.example.community.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;

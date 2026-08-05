@@ -2,10 +2,10 @@ package com.example.community.controller;
 
 import com.example.community.common.ResponseFormat;
 import com.example.community.common.ResponseMessage;
-import com.example.community.dto.AccessTokenResponseDTO;
-import com.example.community.dto.LoginResponseDTO;
+import com.example.community.dto.auth.AccessTokenResponseDTO;
+import com.example.community.dto.auth.LoginResponseDTO;
 import com.example.community.service.AuthService;
-import com.example.community.dto.LoginRequestDTO;
+import com.example.community.dto.auth.LoginRequestDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

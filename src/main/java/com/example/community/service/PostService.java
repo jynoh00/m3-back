@@ -2,7 +2,9 @@ package com.example.community.service;
 
 import com.example.community.common.ExceptionMessage;
 import com.example.community.common.PageRequestFactory;
-import com.example.community.dto.*;
+import com.example.community.dto.music.MusicSearchResultDTO;
+import com.example.community.dto.post.*;
+import com.example.community.dto.post.like.LikeResponseDTO;
 import com.example.community.entity.history.post.PostHistory;
 import com.example.community.entity.main.music.ArtistMusic;
 import com.example.community.entity.main.post.Post;

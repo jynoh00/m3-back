@@ -2,11 +2,11 @@ package com.example.community.controller;
 
 import com.example.community.common.ResponseFormat;
 import com.example.community.common.ResponseMessage;
-import com.example.community.dto.CommentIdResponseDTO;
-import com.example.community.dto.CommentPageResponseDTO;
+import com.example.community.dto.comment.CommentIdResponseDTO;
+import com.example.community.dto.comment.CommentPageResponseDTO;
 import com.example.community.security.TokenProvider;
 import com.example.community.service.CommentService;
-import com.example.community.dto.CommentRequestDTO;
+import com.example.community.dto.comment.CommentRequestDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

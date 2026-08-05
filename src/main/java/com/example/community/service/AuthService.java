@@ -1,9 +1,9 @@
 package com.example.community.service;
 
 import com.example.community.common.ExceptionMessage;
-import com.example.community.dto.AccessTokenResponseDTO;
-import com.example.community.dto.LoginRequestDTO;
-import com.example.community.dto.LoginResponseDTO;
+import com.example.community.dto.auth.AccessTokenResponseDTO;
+import com.example.community.dto.auth.LoginRequestDTO;
+import com.example.community.dto.auth.LoginResponseDTO;
 import com.example.community.entity.main.auth.RefreshToken;
 import com.example.community.entity.main.user.User;
 import com.example.community.exception.AuthenticationException;
