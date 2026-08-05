@@ -23,7 +23,6 @@ import com.example.community.repository.main.post.TempPostRepository;
 import com.example.community.repository.main.post.like.PostLikeRepository;
 import com.example.community.repository.main.post.report.PostReportRepository;
 import com.example.community.repository.main.post.view.PostViewRepository;
-import com.example.community.repository.main.user.UserRepository;
 import com.example.community.repository.main.user.UserStatRepository;
 import com.example.community.service.support.MusicFinder;
 import com.example.community.service.support.PostFinder;
@@ -42,7 +41,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class PostService {
     private final PostRepository postRepository;
-    private final UserRepository userRepository;
     private final TempPostRepository tempPostRepository;
     private final PostHistoryRepository postHistoryRepository;
     private final PostLikeRepository postLikeRepository;

@@ -13,8 +13,6 @@ import com.example.community.exception.AuthorizationException;
 import com.example.community.exception.NotFoundException;
 import com.example.community.repository.history.comment.CommentHistoryRepository;
 import com.example.community.repository.main.comment.CommentRepository;
-import com.example.community.repository.main.post.PostRepository;
-import com.example.community.repository.main.user.UserRepository;
 import com.example.community.service.support.PostFinder;
 import com.example.community.service.support.UserFinder;
 import lombok.RequiredArgsConstructor;
@@ -26,9 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class CommentService {
-    private final PostRepository postRepository;
     private final CommentRepository commentRepository;
-    private final UserRepository userRepository;
     private final CommentHistoryRepository commentHistoryRepository;
 
     private final PostFinder postFinder;
