@@ -24,6 +24,8 @@ jobs:
 
       - name: 빌드 & 테스트
         run: ./gradlew build
+        env:
+          JWT_SECRET: ci-test-dummy-secret-value-not-used-in-production
 
   build-and-push:
     needs: build-and-test
