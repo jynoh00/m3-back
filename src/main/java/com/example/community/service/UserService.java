@@ -10,7 +10,7 @@ import com.example.community.exception.NotFoundException;
 import com.example.community.repository.history.user.UserHistoryRepository;
 import com.example.community.repository.main.auth.RefreshTokenRepository;
 import com.example.community.repository.main.user.UserRepository;
-import com.example.community.security.PasswordEncoder;
+import com.example.community.security.CustomPasswordEncoder;
 import com.example.community.service.support.UserFinder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final CustomPasswordEncoder passwordEncoder;
     private final UserHistoryRepository userHistoryRepository;
     private final RefreshTokenRepository refreshTokenRepository;
 

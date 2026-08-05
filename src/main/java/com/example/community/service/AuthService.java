@@ -12,7 +12,7 @@ import com.example.community.exception.NotFoundException;
 import com.example.community.repository.main.auth.RefreshTokenRepository;
 import com.example.community.repository.main.user.UserRepository;
 import com.example.community.security.BearerTokenExtractor;
-import com.example.community.security.PasswordEncoder;
+import com.example.community.security.CustomPasswordEncoder;
 import com.example.community.security.RefreshTokenInfo;
 import com.example.community.security.TokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,7 @@ import java.time.LocalDateTime;
 public class AuthService {
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final CustomPasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
 
     @Transactional

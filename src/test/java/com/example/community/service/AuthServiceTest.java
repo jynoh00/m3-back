@@ -10,7 +10,7 @@ import com.example.community.exception.AuthenticationException;
 import com.example.community.exception.NotFoundException;
 import com.example.community.repository.main.auth.RefreshTokenRepository;
 import com.example.community.repository.main.user.UserRepository;
-import com.example.community.security.PasswordEncoder;
+import com.example.community.security.CustomPasswordEncoder;
 import com.example.community.security.RefreshTokenInfo;
 import com.example.community.security.TokenProvider;
 import org.junit.jupiter.api.Test;
@@ -55,7 +55,7 @@ class AuthServiceTest {
     RefreshTokenRepository refreshTokenRepository;
 
     @Mock
-    PasswordEncoder passwordEncoder;
+    CustomPasswordEncoder passwordEncoder;
 
     @Mock
     TokenProvider tokenProvider;

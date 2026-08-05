@@ -10,7 +10,7 @@ import com.example.community.exception.NotFoundException;
 import com.example.community.repository.history.user.UserHistoryRepository;
 import com.example.community.repository.main.auth.RefreshTokenRepository;
 import com.example.community.repository.main.user.UserRepository;
-import com.example.community.security.PasswordEncoder;
+import com.example.community.security.CustomPasswordEncoder;
 import com.example.community.service.support.UserFinder;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -62,7 +62,7 @@ class UserServiceTest {
     RefreshTokenRepository refreshTokenRepository;
 
     @Mock
-    PasswordEncoder passwordEncoder;
+    CustomPasswordEncoder passwordEncoder;
 
     @Mock
     UserFinder userFinder;
