@@ -10,6 +10,21 @@ env:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: m3
+          MYSQL_USER: m3_app
+          MYSQL_PASSWORD: test1234
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
     steps:
       - uses: actions/checkout@v4
 
@@ -22,10 +37,16 @@ jobs:
       - name: gradlew 실행 권한 부여
         run: chmod +x gradlew
 
+      - name: 스키마 적용
+        run: mysql -h 127.0.0.1 -P 3306 -u root -proot m3 < src/main/resources/schema.sql
+
       - name: 빌드 & 테스트
         run: ./gradlew build
         env:
           JWT_SECRET: ci-test-dummy-secret-value-not-used-in-production
+          SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/m3?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+          SPRING_DATASOURCE_USERNAME: m3_app
+          SPRING_DATASOURCE_PASSWORD: test1234
 
   build-and-push:
     needs: build-and-test
