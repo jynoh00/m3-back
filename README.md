@@ -31,11 +31,13 @@
   - Spring Data JPA
   - Spring Security
   - Spring Validation
-- **Database**: H2 (파일 기반, `./data/community`)
+- **Database**: MySQL 8.x (AWS RDS, `com.mysql:mysql-connector-j` 드라이버)
+  - 스키마는 `spring.jpa.hibernate.ddl-auto=none`으로 자동 생성하지 않으며, `src/main/resources/schema.sql`을 직접 적용
+  - `spring-boot-h2console` 의존성은 남아 있지만 현재 데이터소스가 MySQL이라 사용되지 않음(과거 H2 기반 개발 단계의 잔재)
 - **인증**: JWT (`io.jsonwebtoken` / jjwt 0.12.6) 기반 Access/Refresh Token
 - **빌드 도구**: Gradle 9.5.1 (Gradle Wrapper 포함)
-- **배포**: Docker(멀티스테이지 빌드: JDK 26 기반 `bootJar` 빌드 → JRE 26 런타임), GitHub Actions(빌드/테스트 후 GHCR 이미지 빌드·푸시, EC2 배포)
-- **기타**: Lombok, H2 Console
+- **배포**: Docker(멀티스테이지 빌드: JDK 26 기반 `bootJar` 빌드 → JRE 26 런타임), GitHub Actions(MySQL 서비스 컨테이너로 빌드/테스트 후 GHCR 이미지 빌드·푸시, EC2 배포)
+- **기타**: Lombok
 
 ---
 
@@ -59,7 +61,7 @@ src/main
 │   └── service/                    # 비즈니스 로직과 조회 지원 로직
 └── resources
     ├── application.properties      # 데이터베이스, JWT, CORS, 업로드 설정
-    ├── schema.sql                  # H2 스키마
+    ├── schema.sql                  # MySQL 스키마 (InnoDB, utf8mb4)
     └── static/images/              # 기본 프로필 이미지
 ```
 
@@ -140,29 +142,36 @@ src/main
 ### 사전 요구 사항
 
 - Java 26
-- `JWT_SECRET` 환경 변수
+- 접속 가능한 MySQL 8.x 서버(또는 AWS RDS 인스턴스)와 `m3` 데이터베이스
+- `JWT_SECRET`, `DB_PASSWORD` 환경 변수
 - macOS/Linux에서는 Gradle Wrapper 실행 권한
 
 ### 환경 변수
 
-JWT 서명에 사용할 충분히 긴 HMAC 키를 환경 변수로 설정합니다.
+JWT 서명 키와 데이터베이스 접속 비밀번호를 환경 변수로 설정합니다.
 
 ```bash
 export JWT_SECRET='<32바이트 이상의 안전한 임의 문자열>'
+export DB_PASSWORD='<MySQL 사용자(m3_app) 비밀번호>'
 ```
 
-또는 프로젝트 루트에 Git에서 제외되는 `.env` 파일을 생성할 수 있습니다.
+또는 프로젝트 루트에 Git에서 제외되는 `.env` 파일을 생성할 수 있습니다(`spring.config.import=optional:file:./.env[.properties]`로 자동 로드).
 
 ```properties
 JWT_SECRET=<32바이트 이상의 안전한 임의 문자열>
+DB_PASSWORD=<MySQL 사용자(m3_app) 비밀번호>
 ```
 
 ### 데이터베이스
 
-- 기본 데이터베이스 URL은 `jdbc:h2:file:./data/community`입니다.
-- 테이블 정의는 `src/main/resources/schema.sql`에 있습니다.
-- 현재 `spring.sql.init.mode=never`, `spring.jpa.hibernate.ddl-auto=none`이므로 빈 데이터베이스에는 스키마가 자동 생성되지 않습니다. 처음 구성할 때는 `schema.sql`을 H2에 한 번 적용해야 합니다.
-- H2 Console은 `/h2-console`에서 사용할 수 있으며 JDBC URL, 사용자명, 비밀번호는 각각 `jdbc:h2:file:./data/community`, `sa`, 빈 문자열입니다.
+- 기본 데이터소스 URL은 `jdbc:mysql://m3-mysql.cvu62c46qis5.ap-northeast-2.rds.amazonaws.com:3306/m3`이며, `spring.datasource.url` 등으로 재정의할 수 있습니다.
+- 접속 계정은 `m3_app`이고, 비밀번호는 `DB_PASSWORD` 환경 변수로 주입합니다.
+- 테이블 정의는 `src/main/resources/schema.sql`(MySQL/InnoDB, `utf8mb4`)에 있습니다.
+- `spring.jpa.hibernate.ddl-auto=none`이므로 스키마가 자동 생성되지 않습니다. 최초 구성 시 대상 MySQL 데이터베이스에 `schema.sql`을 한 번 적용해야 합니다.
+
+```bash
+mysql -h <host> -P 3306 -u m3_app -p m3 < src/main/resources/schema.sql
+```
 
 ### 서버 실행
 
@@ -198,9 +207,9 @@ Windows:
 
 - **컨테이너화**: `Dockerfile`은 멀티스테이지 빌드로 구성됩니다.
   - 빌드 스테이지(`eclipse-temurin:26-jdk`): Gradle Wrapper로 의존성을 미리 받아 캐시한 뒤 `./gradlew bootJar --no-daemon -x test`로 실행 가능한 JAR을 생성합니다.
-  - 실행 스테이지(`eclipse-temurin:26-jre`): 빌드 산출물(`app.jar`)만 복사하고, 비루트 사용자(`appuser`)로 전환하여 `/app/data`(H2 파일 DB), `/app/uploads`(업로드 이미지) 디렉터리 권한을 부여한 뒤 `8080` 포트로 서비스합니다.
+  - 실행 스테이지(`eclipse-temurin:26-jre`): 빌드 산출물(`app.jar`)만 복사하고, 비루트 사용자(`appuser`)로 전환하여 `/app/data`, `/app/uploads`(업로드 이미지) 디렉터리 권한을 부여한 뒤 `8080` 포트로 서비스합니다.
 - **CI/CD**: `.github/workflows/deploy.yml`이 `main` 브랜치 푸시 시 다음을 수행합니다.
-  1. JDK 26 환경에서 `./gradlew build`로 빌드 및 테스트 수행 (CI 전용 더미 `JWT_SECRET` 사용)
+  1. `mysql:8.4` 서비스 컨테이너(DB `m3`, 사용자 `m3_app`)를 띄우고 `schema.sql`을 적용한 뒤, JDK 26 환경에서 `./gradlew build`로 빌드 및 테스트 수행 (CI 전용 더미 `JWT_SECRET`과 테스트용 `SPRING_DATASOURCE_*` 값 사용)
   2. Docker 이미지를 빌드해 GHCR(`ghcr.io/<owner>/m3-back`)에 `latest`, 커밋 SHA 태그로 푸시
   3. SSH로 EC2에 접속해 `docker compose pull backend` / `docker compose up -d backend` 후 사용하지 않는 이미지를 정리(`docker image prune -f`)하여 배포
 
