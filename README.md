@@ -18,6 +18,7 @@
 - [API 개요](#api-개요)
 - [인증 방식](#인증-방식)
 - [실행 방법](#실행-방법)
+- [배포](#배포)
 - [프론트엔드 연동](#프론트엔드-연동)
 
 ---
@@ -33,6 +34,7 @@
 - **Database**: H2 (파일 기반, `./data/community`)
 - **인증**: JWT (`io.jsonwebtoken` / jjwt 0.12.6) 기반 Access/Refresh Token
 - **빌드 도구**: Gradle 9.5.1 (Gradle Wrapper 포함)
+- **배포**: Docker(멀티스테이지 빌드: JDK 26 기반 `bootJar` 빌드 → JRE 26 런타임), GitHub Actions(빌드/테스트 후 GHCR 이미지 빌드·푸시, EC2 배포)
 - **기타**: Lombok, H2 Console
 
 ---
@@ -192,6 +194,16 @@ Windows:
 .\gradlew.bat test
 ```
 
+## 배포
+
+- **컨테이너화**: `Dockerfile`은 멀티스테이지 빌드로 구성됩니다.
+  - 빌드 스테이지(`eclipse-temurin:26-jdk`): Gradle Wrapper로 의존성을 미리 받아 캐시한 뒤 `./gradlew bootJar --no-daemon -x test`로 실행 가능한 JAR을 생성합니다.
+  - 실행 스테이지(`eclipse-temurin:26-jre`): 빌드 산출물(`app.jar`)만 복사하고, 비루트 사용자(`appuser`)로 전환하여 `/app/data`(H2 파일 DB), `/app/uploads`(업로드 이미지) 디렉터리 권한을 부여한 뒤 `8080` 포트로 서비스합니다.
+- **CI/CD**: `.github/workflows/deploy.yml`이 `main` 브랜치 푸시 시 다음을 수행합니다.
+  1. JDK 26 환경에서 `./gradlew build`로 빌드 및 테스트 수행 (CI 전용 더미 `JWT_SECRET` 사용)
+  2. Docker 이미지를 빌드해 GHCR(`ghcr.io/<owner>/m3-back`)에 `latest`, 커밋 SHA 태그로 푸시
+  3. SSH로 EC2에 접속해 `docker compose pull backend` / `docker compose up -d backend` 후 사용하지 않는 이미지를 정리(`docker image prune -f`)하여 배포
+
 ## 프론트엔드 연동
 
 - 이 서버는 별도로 구현된 React 프론트엔드 프로젝트와 연동되는 API 서버입니다.
@@ -203,5 +215,3 @@ Windows:
   - `http://localhost:5500`
   - `http://127.0.0.1:5500`
 - 클라이언트가 인증 API를 호출할 때는 `Authorization` 헤더에 올바른 Access Token 또는 Refresh Token을 전달해야 합니다.
-
-
