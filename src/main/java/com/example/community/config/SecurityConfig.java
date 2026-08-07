@@ -51,7 +51,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, PublicPaths.TOKEN).permitAll()
                         .requestMatchers(HttpMethod.POST, PublicPaths.LOGOUT).permitAll()
                         .requestMatchers(HttpMethod.POST, PublicPaths.IMAGES).permitAll()
-                        .requestMatchers(HttpMethod.GET, PublicPaths.IMAGES + "/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

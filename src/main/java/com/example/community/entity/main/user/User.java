@@ -10,6 +10,8 @@ import java.time.LocalDateTime;
 @Table(name = "users")
 @Getter
 public class User {
+    private static final String DEFAULT_IMAGE_URL =
+            "https://jynoh00-m3-images.s3.ap-northeast-2.amazonaws.com/defaults/default-profile.png";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,7 +48,7 @@ public class User {
             this.image = image;
             return;
         }
-        this.image = "/images/default-profile.png";
+        this.image = DEFAULT_IMAGE_URL;
     }
 
     public void delete() {

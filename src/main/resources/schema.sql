@@ -5,7 +5,7 @@ CREATE TABLE users (
     email VARCHAR(255) NOT NULL,
     password VARCHAR(255) NULL,
     nickname VARCHAR(50) NOT NULL,
-    image VARCHAR(500) NULL DEFAULT '/images/default-profile.png',
+    image VARCHAR(500) NULL DEFAULT 'https://jynoh00-m3-images.s3.ap-northeast-2.amazonaws.com/defaults/default-profile.png',
     deleted_at DATETIME(6) NULL,
     role VARCHAR(20) NOT NULL DEFAULT 'ROLE_USER',
 
