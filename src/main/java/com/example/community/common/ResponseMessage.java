@@ -40,6 +40,7 @@ public enum ResponseMessage {
     POST_BLIND_SUCCESS("post_blind_success"),
     REJECT_REPORTS_SUCCESS("reject_reports_success"),
     MUSIC_SEARCH_SUCCESS("music_search_success"),
+    OEMBED_FETCH_SUCCESS("oembed_fetch_success"),
     IMAGE_UPLOAD_SUCCESS("image_upload_success");
 
 

@@ -43,6 +43,8 @@ public enum ExceptionMessage {
     // 음악 관련
     MUSIC_NOT_SELECTED("music_not_selected"),
     SEARCH_KEYWORD_REQUIRED("search_keyword_required"),
+    UNSUPPORTED_MUSIC_PROVIDER("unsupported_music_provider"),
+    OEMBED_FETCH_FAILED("oembed_fetch_failed"),
 
     // 댓글 관련
     COMMENT_NOT_FOUND("comment_not_found"),

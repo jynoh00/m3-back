@@ -27,6 +27,7 @@ public final class ValidationMessage {
     public static final String COVER_IMAGE_REQUIRED = "cover_image_required";
     public static final String ARTIST_NAMES_REQUIRED = "artist_names_required";
     public static final String ARTIST_NAME_BLANK = "artist_name_blank";
+    public static final String MUSIC_URL_REQUIRED = "music_url_required";
 
     public static final String COMMENT_CONTENT_REQUIRED = "comment_content_required";
 
