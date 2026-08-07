@@ -34,9 +34,6 @@ public class ImageStorageService {
     @Value("${cloud.aws.s3.public-base-url}")
     private String publicBaseUrl;
 
-    @Value("${file.upload-dir}")
-    private String uploadDir;
-
     public String storeUserImage(MultipartFile file) {
         validate(file);
 
