@@ -16,4 +16,9 @@ public class ArtistSummaryDTO {
         this.artistId = artist.getId();
         this.artistName = artist.getName();
     }
+
+    public ArtistSummaryDTO(String artistName) {
+        this.artistId = null;
+        this.artistName = artistName;
+    }
 }

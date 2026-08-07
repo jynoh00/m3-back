@@ -8,6 +8,7 @@ import com.example.community.dto.music.OembedResultDTO;
 import com.example.community.entity.main.music.Music;
 import com.example.community.exception.InvalidRequestException;
 import com.example.community.repository.main.music.MusicRepository;
+import com.example.community.service.musicbrainz.MusicBrainzSearchService;
 import com.example.community.service.oembed.MusicOembedAdapter;
 import com.example.community.service.support.MusicFinder;
 import lombok.RequiredArgsConstructor;
@@ -22,15 +23,19 @@ public class MusicService {
     private final MusicRepository musicRepository;
     private final MusicFinder musicFinder;
     private final List<MusicOembedAdapter> oembedAdapters;
+    private final MusicBrainzSearchService musicBrainzSearchService;
 
     @Transactional(readOnly = true)
     public MusicSearchResponseDTO searchMusicProcess(String keyword) {
-        return new MusicSearchResponseDTO(
-                keyword,
-                musicRepository.searchByKeyword(keyword).stream()
-                        .map(this::toSearchResult)
-                        .toList()
-        );
+        List<MusicSearchResultDTO> internalResults = musicRepository.searchByKeyword(keyword).stream()
+                .map(this::toSearchResult)
+                .toList();
+
+        if (!internalResults.isEmpty()) {
+            return new MusicSearchResponseDTO(keyword, internalResults);
+        }
+
+        return new MusicSearchResponseDTO(keyword, musicBrainzSearchService.search(keyword));
     }
 
     @Transactional

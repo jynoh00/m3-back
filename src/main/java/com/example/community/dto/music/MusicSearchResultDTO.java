@@ -29,4 +29,13 @@ public class MusicSearchResultDTO {
                 .map(am -> new ArtistSummaryDTO(am.getArtist()))
                 .toList();
     }
+
+    public MusicSearchResultDTO(String musicTitle, String coverImage, List<String> artistNames) {
+        this.musicId = null;
+        this.musicTitle = musicTitle;
+        this.coverImage = coverImage;
+        this.artists = artistNames.stream()
+                .map(ArtistSummaryDTO::new)
+                .toList();
+    }
 }
