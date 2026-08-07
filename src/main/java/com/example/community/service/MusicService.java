@@ -27,15 +27,16 @@ public class MusicService {
 
     @Transactional(readOnly = true)
     public MusicSearchResponseDTO searchMusicProcess(String keyword) {
-        List<MusicSearchResultDTO> internalResults = musicRepository.searchByKeyword(keyword).stream()
+        List<MusicSearchResultDTO> result = new java.util.ArrayList<>(musicRepository.searchByKeyword(keyword).stream()
                 .map(this::toSearchResult)
-                .toList();
+                .toList());
 
-        if (!internalResults.isEmpty()) {
-            return new MusicSearchResponseDTO(keyword, internalResults);
+        if (!result.isEmpty() && result.size() >= 20) {
+            return new MusicSearchResponseDTO(keyword, result);
         }
 
-        return new MusicSearchResponseDTO(keyword, musicBrainzSearchService.search(keyword));
+        result.addAll(musicBrainzSearchService.search(keyword));
+        return new MusicSearchResponseDTO(keyword, result);
     }
 
     @Transactional
